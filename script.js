@@ -1,35 +1,57 @@
-const state={rankIndex:0,level:1,exp:0,gold:0,weapon:0,stage:1,lastSaved:Date.now()};
-const ranks=[{name:'주민',title:'떠돌이 주민',color:0x8f6b46,reqLv:5,reqGold:300},{name:'병사',title:'초원 수비병',color:0x4a7ee8,reqLv:12,reqGold:1200},{name:'장수',title:'전장의 장수',color:0x8c48ff,reqLv:25,reqGold:5000},{name:'장군',title:'왕국의 장군',color:0xffb238,reqLv:45,reqGold:18000},{name:'왕',title:'황금 왕좌의 왕',color:0xffda58,reqLv:70,reqGold:70000},{name:'황제',title:'천하의 황제',color:0xfff3a2,reqLv:999,reqGold:999999}];
-const monsters=['들판 슬라임','고블린 척후병','늑대 전사','황무지 오거','암흑 기사','고대 드래곤'];
-let monster={name:monsters[0],maxHp:40,hp:40};
-const $=id=>document.getElementById(id);
-function load(){try{Object.assign(state,JSON.parse(localStorage.getItem('emperorRoadSave')||'{}'))}catch(e){}const offline=Math.min(7200,Math.floor((Date.now()-(state.lastSaved||Date.now()))/1000));if(offline>20){const gain=Math.floor(offline*(2+state.level*.35));state.gold+=gain;state.exp+=Math.floor(offline*(3+state.level*.4));toast(`오프라인 보상 ${gain}G 획득`)}state.lastSaved=Date.now();}
-function save(){state.lastSaved=Date.now();localStorage.setItem('emperorRoadSave',JSON.stringify(state));toast('저장 완료')}
-function power(){return 10+state.level*4+state.weapon*9+state.rankIndex*35}
-function needExp(){return 100+state.level*42+state.rankIndex*180}
-function setupMonster(){const tier=Math.min(monsters.length-1,Math.floor((state.stage-1)/4));monster.name=monsters[tier];monster.maxHp=40+state.stage*28+state.rankIndex*90;monster.hp=monster.maxHp;}
-function updateUI(){const r=ranks[state.rankIndex];$('rankBadge').textContent=r.name;$('heroTitle').textContent=r.title;$('levelText').textContent=`Lv. ${state.level}`;$('powerText').textContent=`전투력 ${power()}`;$('expText').textContent=`EXP ${state.exp} / ${needExp()}`;$('goldText').textContent=`${state.gold} G`;$('expBar').style.width=Math.min(100,state.exp/needExp()*100)+'%';$('monsterName').textContent=monster.name;$('monsterHpText').textContent=`HP ${Math.max(0,monster.hp)} / ${monster.maxHp}`;$('monsterHpBar').style.width=Math.max(0,monster.hp/monster.maxHp*100)+'%';}
-function levelCheck(){while(state.exp>=needExp()){state.exp-=needExp();state.level++;state.gold+=80+state.level*12;toast(`레벨업 Lv.${state.level}`);heroPulse();}}
-function attack(){const dmg=Math.floor(power()*(.55+Math.random()*.55));monster.hp-=dmg;spawnHit(dmg);$('combatLog').textContent=`${ranks[state.rankIndex].name}이 ${monster.name}에게 ${dmg} 피해를 입혔습니다.`;if(monster.hp<=0){const g=40+state.stage*22;const e=35+state.stage*16;state.gold+=g;state.exp+=e;state.stage++;setupMonster();$('combatLog').textContent=`몬스터 처치. ${g}G, EXP ${e} 획득. 스테이지 ${state.stage} 진입.`;}levelCheck();updateUI();}
-function evolve(){const r=ranks[state.rankIndex];if(state.rankIndex>=ranks.length-1)return toast('이미 황제 단계입니다');if(state.level>=r.reqLv&&state.gold>=r.reqGold){state.gold-=r.reqGold;state.rankIndex++;applyHeroMaterial();toast(`${ranks[state.rankIndex].name} 승급 완료`);heroPulse();}else toast(`승급 조건 Lv.${r.reqLv} / ${r.reqGold}G`);updateUI();}
-function upgradeWeapon(){const cost=120+state.weapon*160;if(state.gold<cost)return toast(`강화 비용 ${cost}G 부족`);state.gold-=cost;state.weapon++;toast(`무기 +${state.weapon} 강화`);heroPulse();updateUI();}
-function boss(){const cost=500+state.stage*60;if(state.gold<cost)return toast(`보스 입장 ${cost}G 필요`);state.gold-=cost;monster.name='보스 '+monsters[Math.min(monsters.length-1,Math.floor(state.stage/4))];monster.maxHp=260+state.stage*80;monster.hp=monster.maxHp;toast('보스 등장');updateUI();}
-function reward(){const gain=300+state.level*30;state.gold+=gain;toast(`접속 보상 ${gain}G`);updateUI();}
-function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>el.classList.remove('show'),1300)}
-
-let scene,camera,renderer,hero,enemy,clock,hitGroup,particles=[];
-function init3D(){const canvas=$('gameCanvas');scene=new THREE.Scene();scene.fog=new THREE.Fog(0x10182e,18,58);camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,100);camera.position.set(0,7,12);camera.lookAt(0,1,0);renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;clock=new THREE.Clock();scene.add(new THREE.HemisphereLight(0xbfe8ff,0x182033,1.9));const sun=new THREE.DirectionalLight(0xfff0c8,3.2);sun.position.set(-6,10,8);sun.castShadow=true;scene.add(sun);
- const ground=new THREE.Mesh(new THREE.CylinderGeometry(9.5,10.8,.7,96),new THREE.MeshStandardMaterial({color:0x287050,roughness:.75,metalness:.05}));ground.position.y=-.35;ground.receiveShadow=true;scene.add(ground);
- const path=new THREE.Mesh(new THREE.RingGeometry(2.4,8.2,96),new THREE.MeshStandardMaterial({color:0x746143,roughness:.9}));path.rotation.x=-Math.PI/2;path.position.y=.02;scene.add(path);
- for(let i=0;i<34;i++){const a=i/34*Math.PI*2;const radius=8.5+Math.random()*3;addTree(Math.cos(a)*radius,Math.sin(a)*radius)}
- hero=createHero();hero.position.set(-2.2,.05,0);scene.add(hero);enemy=createEnemy();enemy.position.set(2.4,.05,0);scene.add(enemy);hitGroup=new THREE.Group();scene.add(hitGroup);animate();}
-function addTree(x,z){const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.09,.14,.8,8),new THREE.MeshStandardMaterial({color:0x5b351c}));trunk.position.set(x,.35,z);const leaf=new THREE.Mesh(new THREE.ConeGeometry(.55,1.25,10),new THREE.MeshStandardMaterial({color:0x185d35}));leaf.position.set(x,.95,z);trunk.castShadow=leaf.castShadow=true;scene.add(trunk,leaf)}
-function createHero(){const g=new THREE.Group();const mat=()=>new THREE.MeshStandardMaterial({color:ranks[state.rankIndex].color,metalness:.45,roughness:.28});const body=new THREE.Mesh(new THREE.CapsuleGeometry(.45,1.25,8,16),mat());body.position.y=1.15;const head=new THREE.Mesh(new THREE.SphereGeometry(.38,24,16),new THREE.MeshStandardMaterial({color:0xffd0a0,roughness:.45}));head.position.y=2.08;const weapon=new THREE.Mesh(new THREE.BoxGeometry(.12,1.7,.12),new THREE.MeshStandardMaterial({color:0xd7e8ff,metalness:.8,roughness:.2}));weapon.position.set(.75,1.25,.05);weapon.rotation.z=-.55;const crown=new THREE.Mesh(new THREE.ConeGeometry(.35,.34,5),new THREE.MeshStandardMaterial({color:0xffd866,metalness:.6,roughness:.18}));crown.position.y=2.52;g.add(body,head,weapon,crown);g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});return g}
-function createEnemy(){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.SphereGeometry(.72,32,20),new THREE.MeshStandardMaterial({color:0x8cff80,roughness:.35,metalness:.05,emissive:0x184a16,emissiveIntensity:.2}));body.position.y=.72;const eyeMat=new THREE.MeshStandardMaterial({color:0x111111});const e1=new THREE.Mesh(new THREE.SphereGeometry(.07,12,8),eyeMat);e1.position.set(-.22,.92,.62);const e2=e1.clone();e2.position.x=.22;g.add(body,e1,e2);g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});return g}
-function applyHeroMaterial(){scene.remove(hero);hero=createHero();hero.position.set(-2.2,.05,0);scene.add(hero)}
-function heroPulse(){hero.scale.set(1.18,1.18,1.18);setTimeout(()=>hero.scale.set(1,1,1),160)}
-function spawnHit(dmg){const geo=new THREE.SphereGeometry(.07,8,8);const mat=new THREE.MeshBasicMaterial({color:0xfff1a6});for(let i=0;i<10;i++){const p=new THREE.Mesh(geo,mat);p.position.set(1.8+Math.random()*1.1,1+Math.random()*1.2,(Math.random()-.5)*.9);p.userData={life:1,v:new THREE.Vector3((Math.random()-.5)*.08,.06+Math.random()*.08,(Math.random()-.5)*.08)};hitGroup.add(p);particles.push(p)}}
-function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();hero.position.y=.05+Math.sin(t*2)*.06;enemy.scale.setScalar(1+Math.sin(t*4)*.035);enemy.rotation.y=Math.sin(t*1.7)*.22;camera.position.x=Math.sin(t*.18)*.5;camera.lookAt(0,1,0);particles=particles.filter(p=>{p.userData.life-=.025;p.position.add(p.userData.v);p.material.opacity=p.userData.life;if(p.userData.life<=0){hitGroup.remove(p);return false}return true});renderer.render(scene,camera)}
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-$('saveBtn').onclick=save;$('evolveBtn').onclick=evolve;$('weaponBtn').onclick=upgradeWeapon;$('bossBtn').onclick=boss;$('rewardBtn').onclick=reward;
-load();setupMonster();init3D();updateUI();setInterval(attack,1100);setInterval(save,15000);
+const ranks = [
+  { title: '떠돌이 주민', cls: 'resident', needLv: 5, needGold: 300 },
+  { title: '초급 병사', cls: 'soldier', needLv: 12, needGold: 1500 },
+  { title: '무림 장수', cls: 'captain', needLv: 25, needGold: 7000 },
+  { title: '강호 장군', cls: 'general', needLv: 45, needGold: 25000 },
+  { title: '무림의 왕', cls: 'king', needLv: 70, needGold: 90000 },
+  { title: '천하 황제', cls: 'emperor', needLv: 99, needGold: 300000 }
+];
+const monsters = ['혈교 잡병', '독안귀', '흑풍 자객', '마교 호위', '혈교 장로'];
+let state = JSON.parse(localStorage.getItem('murimIdleSave') || 'null') || { level:1, exp:0, gold:0, weapon:0, rank:0, stage:1, heroHp:40, monsterHp:80, last:Date.now() };
+const $ = id => document.getElementById(id);
+function maxExp(){return 80 + state.level * 20}
+function power(){return 10 + state.level * 3 + state.weapon * 9 + state.rank * 35}
+function maxHeroHp(){return 40 + state.level * 8 + state.rank * 45}
+function maxMonsterHp(){return 65 + state.stage * 18 + state.rank * 35}
+function save(){state.last=Date.now();localStorage.setItem('murimIdleSave', JSON.stringify(state))}
+function render(){
+  const r = ranks[state.rank];
+  $('rankText').textContent = r.title;
+  $('levelText').textContent = `Lv.${state.level}`;
+  $('powerText').textContent = power().toLocaleString();
+  $('expText').textContent = `${Math.floor(state.exp)} / ${maxExp()}`;
+  $('goldText').textContent = Math.floor(state.gold).toLocaleString();
+  $('weaponText').textContent = `+${state.weapon}`;
+  $('stageText').textContent = `${state.stage}관문`;
+  $('monsterName').textContent = monsters[state.stage % monsters.length];
+  $('heroHpBar').style.width = `${Math.max(0,state.heroHp / maxHeroHp() * 100)}%`;
+  $('monsterHpBar').style.width = `${Math.max(0,state.monsterHp / maxMonsterHp() * 100)}%`;
+  $('hero').className = `sprite hero ${r.cls}`;
+}
+function log(t){$('battleLog').textContent = t}
+function hit(){
+  const dmg = Math.round(power() * (0.75 + Math.random()*0.5));
+  state.monsterHp -= dmg;
+  $('damagePop').textContent = `-${dmg}`;
+  $('damagePop').classList.remove('show'); $('slash').classList.remove('show');
+  void $('damagePop').offsetWidth;
+  $('damagePop').classList.add('show'); $('slash').classList.add('show');
+  if(state.monsterHp <= 0){
+    const rewardGold = 25 + state.stage * 12 + state.rank * 80;
+    const rewardExp = 28 + state.stage * 7;
+    state.gold += rewardGold; state.exp += rewardExp; state.stage += 1; state.monsterHp = maxMonsterHp();
+    log(`${monsters[state.stage % monsters.length]} 처치. 금화 ${rewardGold} 획득.`);
+    while(state.exp >= maxExp()){ state.exp -= maxExp(); state.level += 1; state.heroHp = maxHeroHp(); log(`레벨 상승. Lv.${state.level}`); }
+  } else {
+    state.heroHp -= Math.max(1, Math.round(state.stage * 1.2));
+    if(state.heroHp <= 0){ state.heroHp = maxHeroHp(); log('운기조식 후 전투 복귀.'); }
+  }
+  render(); save();
+}
+function upgrade(){ const cost = 120 + state.weapon * state.weapon * 65; if(state.gold < cost){log(`무기 강화에는 ${cost}G가 필요합니다.`); return} state.gold -= cost; state.weapon++; log(`무기 강화 성공. 현재 +${state.weapon}`); render(); save(); }
+function evolve(){ const next = ranks[state.rank+1]; if(!next){log('이미 천하 황제입니다.'); return} if(state.level < ranks[state.rank].needLv || state.gold < ranks[state.rank].needGold){log(`승급 조건: Lv.${ranks[state.rank].needLv} / ${ranks[state.rank].needGold}G`); return} state.gold -= ranks[state.rank].needGold; state.rank++; state.heroHp=maxHeroHp(); log(`${ranks[state.rank].title}로 승급했습니다.`); render(); save(); }
+function boss(){ const gain = Math.round(power()*2.5); state.gold += gain; state.exp += 50; log(`보스에게 큰 피해를 주고 ${gain}G 획득.`); render(); save(); }
+function reward(){ const reward = 500 + state.level*30 + state.stage*12; state.gold += reward; log(`접속 보상 ${reward}G를 받았습니다.`); render(); save(); }
+$('saveBtn').onclick=()=>{save();log('저장 완료.');}; $('upgradeBtn').onclick=upgrade; $('evolveBtn').onclick=evolve; $('bossBtn').onclick=boss; $('rewardBtn').onclick=reward;
+const offline = Math.min(7200, Math.floor((Date.now()-state.last)/1000)); if(offline>60){ const g = Math.floor(offline*(1+state.stage*.25)); state.gold += g; log(`오프라인 보상 ${g}G 획득.`); }
+state.heroHp = state.heroHp || maxHeroHp(); state.monsterHp = state.monsterHp || maxMonsterHp(); render(); setInterval(hit, 1100);
