@@ -1029,40 +1029,57 @@ body > .create-close-fixed,
 .player.player-tier-3{filter:drop-shadow(0 0 16px #ff6b4a) drop-shadow(0 10px 8px rgba(0,0,0,.55))!important}
 .player.player-tier-4,.player.player-tier-5,.player.player-tier-6{filter:drop-shadow(0 0 22px #b06cff) drop-shadow(0 10px 8px rgba(0,0,0,.55))!important}
 
-/* v43 final: clean human knight image skin, no built-in aura */
-.player#playerSprite{
-  width:126px!important;
-  height:166px!important;
-  left:22%!important;
-  bottom:62px!important;
-  background:url("player_hero_clean.png") center bottom / contain no-repeat!important;
+
+/* v44: REAL sprite replacement - clean human knight, no built-in aura */
+#playerSprite.player,
+.stage #playerSprite.player,
+div#playerSprite.player,
+.player.player-tier-0,
+.player.player-tier-1,
+.player.player-tier-2,
+.player.player-tier-3,
+.player.player-tier-4,
+.player.player-tier-5,
+.player.player-tier-6{
+  width:150px!important;
+  height:178px!important;
+  left:18%!important;
+  bottom:66px!important;
+  background:none!important;
+  background-image:url("player_good_knight_v44.png")!important;
+  background-repeat:no-repeat!important;
+  background-position:center bottom!important;
+  background-size:contain!important;
   border:0!important;
   border-radius:0!important;
   box-shadow:none!important;
   overflow:visible!important;
-  animation:heroIdleClean 1.25s infinite ease-in-out!important;
+  filter:drop-shadow(0 18px 13px rgba(0,0,0,.55))!important;
   transform:none!important;
+  animation:v44KnightIdle 1.25s ease-in-out infinite!important;
+  image-rendering:auto!important;
 }
-.player#playerSprite::before,
-.player#playerSprite::after,
-.player#playerSprite .horn,
-.player#playerSprite .eye,
-.player#playerSprite .mouth,
-.player#playerSprite .mouth::before,
-.player#playerSprite .mouth::after{
-  display:none!important;
+#playerSprite.player::before,
+#playerSprite.player::after,
+#playerSprite.player .horn,
+#playerSprite.player .eye,
+#playerSprite.player .mouth{
   content:none!important;
+  display:none!important;
   background:none!important;
   border:0!important;
   box-shadow:none!important;
 }
-.player#playerSprite.player-tier-0{filter:drop-shadow(0 14px 10px rgba(0,0,0,.55))!important;}
-.player#playerSprite.player-tier-1{filter:drop-shadow(0 0 7px rgba(104,211,145,.8)) drop-shadow(0 14px 10px rgba(0,0,0,.55))!important;}
-.player#playerSprite.player-tier-2{filter:drop-shadow(0 0 8px rgba(56,189,248,.85)) drop-shadow(0 14px 10px rgba(0,0,0,.55))!important;}
-.player#playerSprite.player-tier-3{filter:drop-shadow(0 0 9px rgba(192,132,252,.85)) drop-shadow(0 14px 10px rgba(0,0,0,.55))!important;}
-.player#playerSprite.player-tier-4{filter:drop-shadow(0 0 10px rgba(253,224,71,.85)) drop-shadow(0 14px 10px rgba(0,0,0,.55))!important;}
-.player#playerSprite.player-tier-5{filter:drop-shadow(0 0 11px rgba(251,113,133,.85)) drop-shadow(0 14px 10px rgba(0,0,0,.55))!important;}
-.player#playerSprite.player-tier-6{filter:drop-shadow(0 0 12px rgba(255,255,255,.9)) drop-shadow(0 14px 10px rgba(0,0,0,.55))!important;}
-@keyframes heroIdleClean{0%,100%{translate:0 0}50%{translate:8px -5px}}
-@media(max-width:820px){.player#playerSprite{width:96px!important;height:126px!important;left:16%!important;bottom:38px!important}}
-@media(max-width:480px){.player#playerSprite{width:82px!important;height:108px!important;left:14%!important;bottom:36px!important}}
+#playerSprite.player.player-tier-1{filter:drop-shadow(0 0 7px rgba(110,231,183,.55)) drop-shadow(0 18px 13px rgba(0,0,0,.55))!important}
+#playerSprite.player.player-tier-2{filter:drop-shadow(0 0 9px rgba(96,165,250,.58)) drop-shadow(0 18px 13px rgba(0,0,0,.55))!important}
+#playerSprite.player.player-tier-3{filter:drop-shadow(0 0 11px rgba(192,132,252,.60)) drop-shadow(0 18px 13px rgba(0,0,0,.55))!important}
+#playerSprite.player.player-tier-4{filter:drop-shadow(0 0 13px rgba(250,204,21,.62)) drop-shadow(0 18px 13px rgba(0,0,0,.55))!important}
+#playerSprite.player.player-tier-5{filter:drop-shadow(0 0 15px rgba(248,113,113,.64)) drop-shadow(0 18px 13px rgba(0,0,0,.55))!important}
+#playerSprite.player.player-tier-6{filter:drop-shadow(0 0 17px rgba(255,255,255,.66)) drop-shadow(0 18px 13px rgba(0,0,0,.55))!important}
+@keyframes v44KnightIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media(max-width:820px){
+  #playerSprite.player{width:122px!important;height:145px!important;left:12%!important;bottom:42px!important;transform:none!important}
+}
+@media(max-width:480px){
+  #playerSprite.player{width:106px!important;height:126px!important;left:9%!important;bottom:42px!important;transform:none!important}
+}
