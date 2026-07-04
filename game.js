@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v33';
+const SAVE_KEY='random_growth_game_v34';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -44,20 +44,17 @@ function isRealLocalPlayer(obj){
   if(!obj || !obj.name || !obj.id) return false;
   if(isFakePlayerName(obj.name)) return false;
   if(obj.isDummy===true || obj.fake===true || obj.npc===true) return false;
-  // 랭킹은 서버 연동 전까지 현재 저장된 실제 플레이 캐릭터 1명만 허용한다.
-  return obj.localHumanPlayer===true && obj.rankingEligible===true;
+  return true;
 }
 function clearFakeRankingCaches(){
-  // 랭킹은 실제 현재 캐릭터만 표시한다. 과거 버전의 더미/가짜 랭킹 캐시는 전부 삭제한다.
-  const fakeNames=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자','불멸자','패시브황','초월러너','마왕도전자'];
+  const fakeNames=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자','불멸자','패시브황','초월러너'];
   try{
     for(let i=localStorage.length-1;i>=0;i--){
       const k=localStorage.key(i);
       const v=localStorage.getItem(k)||'';
-      const isOldSave=/^random_growth_game_v(1[0-9]|2[0-9]|30|[1-9])$/.test(k);
       const isRankCache=/rank|ranking|leader|score|dummy|fake/i.test(k);
       const hasFakeName=fakeNames.some(n=>v.includes(n));
-      if(isOldSave || isRankCache || hasFakeName) localStorage.removeItem(k);
+      if(isRankCache || hasFakeName) localStorage.removeItem(k);
     }
   }catch(e){}
 }
@@ -125,7 +122,7 @@ function createCharacter(){
   const name=makeRandomName();
   const first=rollSkill([]);
   first.level = 1;
-  state={ id:'player_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now(), localHumanPlayer:true, rankingEligible:true, saveVersion:33 };
+  state={ id:'player_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now(), localHumanPlayer:true, rankingEligible:true, saveVersion:34 };
   state.monster=makeMonster();
   newCharacterModalMode=false;
   $('createModal').classList.remove('active');
@@ -425,10 +422,9 @@ function renderMissions(){
 let currentRankMode='level';
 function buildRankingRows(mode='level'){
   clearFakeRankingCaches();
-  if(!isRealLocalPlayer(state)) return [];
+  if(!state || !state.name || !state.id || !isRealLocalPlayer(state)) return [];
   const z=currentZone();
-  const row={rank:1,name:state.name,level:Math.max(1,state.level||1),zone:z.name,zoneIndex:z.index,me:true};
-  return [row];
+  return [{rank:1,name:state.name,level:Math.max(1,state.level||1),zone:z.name,zoneIndex:z.index,me:true}];
 }
 function renderRanking(mode=currentRankMode){
   currentRankMode=mode;
@@ -516,8 +512,11 @@ if(statusBtn){ statusBtn.onclick=openStatusDetail; }
 
 
 function cleanupCreateModalCloseButtons(){
-  // 새 캐릭터 생성창에는 하단 '창 닫기' 버튼 1개만 남긴다.
+  // 생성창에서는 하단 '창 닫기' 버튼 하나만 남긴다.
   document.querySelectorAll('.create-close-fixed, .modal-x').forEach(el=>el.remove());
+  document.querySelectorAll('body > button').forEach(btn=>{
+    if((btn.textContent||'').trim()==='닫기') btn.remove();
+  });
   const modal=$('createModal');
   if(modal){
     modal.querySelectorAll('button').forEach(btn=>{
@@ -532,7 +531,12 @@ function closeCreateModal(){
   const m=$('createModal');
   if(m) m.classList.remove('active');
   newCharacterModalMode=false;
-  if(state){ state.auto=true; save(); render(); startLoop(); }
+  if(state){
+    state.auto=true;
+    save();
+    render();
+    startLoop();
+  }
 }
 if($('createCloseBottom')) $('createCloseBottom').onclick=closeCreateModal;
 
@@ -554,16 +558,13 @@ document.addEventListener('click', (e)=>{
 $('newCharBtn').onclick=()=>{
   if(!confirm('새 캐릭터 생성창을 열까요? 실제 생성 버튼을 누르기 전까지 현재 캐릭터는 유지됩니다.')) return;
   newCharacterModalMode=true;
-  // 새 캐릭터 창은 '보기만' 열고, 기존 자동 사냥 상태는 절대 건드리지 않는다.
-  if(state){
-    state.auto = true;
-    save();
-    startLoop();
-  }
-  $('passiveModal')?.classList.remove('active');
-  $('dataModal')?.classList.remove('active');
-  $('createModal').classList.add('active');
+  if(state){ state.auto=true; save(); render(); startLoop(); }
+  ['passiveModal','dataModal','rankingModal','missionModal','noticeModal','supportModal','statusDetailModal','skillDexModal'].forEach(id=>$(id)?.classList.remove('active'));
   cleanupCreateModalCloseButtons();
+  $('createModal').classList.add('active');
+  // 혹시 이전 캐시에서 만든 상단 닫기 버튼이 뒤늦게 붙어도 바로 제거
+  setTimeout(cleanupCreateModalCloseButtons, 0);
+  setTimeout(cleanupCreateModalCloseButtons, 100);
 };
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
@@ -593,4 +594,5 @@ $('dataClose').onclick=()=>$('dataModal').classList.remove('active');
 $('dataApply').onclick=()=>{ try{ state=JSON.parse(decodeURIComponent(escape(atob($('dataBox').value.trim())))); state=migrate(state); save(); $('dataModal').classList.remove('active'); render(); startLoop(); log('가져오기 완료.'); }catch(e){ alert('저장 데이터 형식이 올바르지 않습니다.'); } };
 clearFakeRankingCaches();
 cleanupCreateModalCloseButtons();
+setInterval(cleanupCreateModalCloseButtons, 500);
 if(!load()) { $('createModal').classList.add('active'); cleanupCreateModalCloseButtons(); }

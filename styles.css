@@ -809,3 +809,41 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
   margin-top:10px!important;
   background:#2b2241!important;
 }
+
+
+/* v34 final create-modal cleanup: 생성창에는 하단 '창 닫기'만 표시 */
+body > button.create-close-fixed,
+body > .create-close-fixed,
+.create-close-fixed,
+.modal-x,
+#createModal .modal-x,
+#createModal .create-close-fixed,
+#createModal .modal-title button,
+#createModal button[id*="CloseTop"],
+#createModal button[data-extra-create-close="true"]{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  width:0!important;
+  height:0!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+}
+#createModal #createCloseBottom{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  position:static!important;
+  width:100%!important;
+  height:auto!important;
+  padding:11px 13px!important;
+  margin-top:10px!important;
+  overflow:visible!important;
+  background:#2b2241!important;
+  color:#fff!important;
+}
+#createModal .create-title{padding-right:0!important;}
+#createModal .modal-title{position:static!important;background:transparent!important;padding:0!important;}
