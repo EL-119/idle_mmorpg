@@ -847,3 +847,14 @@ body > .create-close-fixed,
 }
 #createModal .create-title{padding-right:0!important;}
 #createModal .modal-title{position:static!important;background:transparent!important;padding:0!important;}
+
+
+/* v35: 새 캐릭터 생성창은 배경 클릭을 막지 않음. 창 밖 UI와 자동 사냥 버튼을 그대로 조작 가능 */
+#createModal{
+  pointer-events:none!important;
+}
+#createModal .modal-box,
+#createModal #createBtn,
+#createModal #createCloseBottom{
+  pointer-events:auto!important;
+}
