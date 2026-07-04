@@ -1,0 +1,255 @@
+const stages = [
+  { name: "주민", title: "떠돌이 주민", avatar: "民", desc: "작은 마을에서 시작해 황제가 되는 길을 걷습니다.", needLevel: 5, needGold: 300, bonus: 1 },
+  { name: "병사", title: "신입 병사", avatar: "兵", desc: "기본 검술을 익히고 전장을 누비기 시작합니다.", needLevel: 12, needGold: 1500, bonus: 1.4 },
+  { name: "장수", title: "용맹한 장수", avatar: "將", desc: "부대를 이끄는 힘을 얻고 강한 적과 맞섭니다.", needLevel: 22, needGold: 6500, bonus: 2 },
+  { name: "장군", title: "전장의 장군", avatar: "軍", desc: "전장을 지배하며 왕국의 운명을 바꿉니다.", needLevel: 35, needGold: 22000, bonus: 3 },
+  { name: "왕", title: "위대한 왕", avatar: "王", desc: "나라를 다스리고 군대를 지휘합니다.", needLevel: 50, needGold: 70000, bonus: 4.5 },
+  { name: "황제", title: "천하의 황제", avatar: "帝", desc: "모든 영지를 통합한 최종 지배자입니다.", needLevel: 999, needGold: 999999999, bonus: 7 }
+];
+
+const monsters = ["들판 슬라임", "고블린 정찰병", "산적", "그림자 늑대", "마족 기사", "고대 골렘"];
+
+const defaultState = {
+  level: 1,
+  exp: 0,
+  gold: 0,
+  stageIndex: 0,
+  weapon: 0,
+  map: 1,
+  monsterHp: 40,
+  lastSaved: Date.now()
+};
+
+let state = loadState();
+let toastTimer;
+
+const $ = (id) => document.getElementById(id);
+
+function expNeed() {
+  return Math.floor(100 + state.level * state.level * 18);
+}
+
+function power() {
+  const stageBonus = stages[state.stageIndex].bonus;
+  return Math.floor((10 + state.level * 4 + state.weapon * 9) * stageBonus);
+}
+
+function monsterMaxHp() {
+  return Math.floor(35 + state.map * 22 + state.level * 7);
+}
+
+function monsterName() {
+  return monsters[Math.min(monsters.length - 1, Math.floor((state.map - 1) / 5))];
+}
+
+function goldReward() {
+  return Math.floor(12 + state.map * 7 + state.level * 2);
+}
+
+function expReward() {
+  return Math.floor(18 + state.map * 5 + state.level * 2);
+}
+
+function loadState() {
+  const saved = localStorage.getItem("idleMmorpgSave");
+  if (!saved) return { ...defaultState };
+  try {
+    const parsed = JSON.parse(saved);
+    const merged = { ...defaultState, ...parsed };
+    applyOfflineReward(merged);
+    return merged;
+  } catch {
+    return { ...defaultState };
+  }
+}
+
+function applyOfflineReward(savedState) {
+  const now = Date.now();
+  const awaySeconds = Math.min(Math.floor((now - savedState.lastSaved) / 1000), 60 * 60 * 8);
+  if (awaySeconds < 30) return;
+  const offlineGold = Math.floor(awaySeconds * Math.max(1, powerFromState(savedState) / 12));
+  const offlineExp = Math.floor(awaySeconds * 3);
+  savedState.gold += offlineGold;
+  savedState.exp += offlineExp;
+  while (savedState.exp >= Math.floor(100 + savedState.level * savedState.level * 18)) {
+    savedState.exp -= Math.floor(100 + savedState.level * savedState.level * 18);
+    savedState.level += 1;
+  }
+  setTimeout(() => showToast(`오프라인 보상 ${offlineGold.toLocaleString()}G 획득`), 500);
+}
+
+function powerFromState(target) {
+  return Math.floor((10 + target.level * 4 + target.weapon * 9) * stages[target.stageIndex].bonus);
+}
+
+function saveState() {
+  state.lastSaved = Date.now();
+  localStorage.setItem("idleMmorpgSave", JSON.stringify(state));
+}
+
+function addLog(text) {
+  const log = $("combatLog");
+  const line = document.createElement("div");
+  line.textContent = text;
+  log.prepend(line);
+  while (log.children.length > 18) log.removeChild(log.lastChild);
+}
+
+function battleTick() {
+  const damage = Math.max(1, Math.floor(power() / 3));
+  state.monsterHp -= damage;
+  addLog(`${monsterName()}에게 ${damage} 피해`);
+  if (state.monsterHp <= 0) {
+    const g = goldReward();
+    const e = expReward();
+    state.gold += g;
+    state.exp += e;
+    addLog(`${monsterName()} 처치: ${g}G, EXP ${e} 획득`);
+    if (Math.random() < 0.22) state.map += 1;
+    levelUpCheck();
+    state.monsterHp = monsterMaxHp();
+  }
+  saveState();
+  render();
+}
+
+function levelUpCheck() {
+  while (state.exp >= expNeed()) {
+    state.exp -= expNeed();
+    state.level += 1;
+    addLog(`레벨 상승: Lv.${state.level}`);
+  }
+}
+
+function evolve() {
+  const current = stages[state.stageIndex];
+  if (state.stageIndex >= stages.length - 1) {
+    showToast("이미 최종 단계입니다");
+    return;
+  }
+  if (state.level < current.needLevel || state.gold < current.needGold) {
+    showToast(`승급 조건 부족: Lv.${current.needLevel}, ${current.needGold.toLocaleString()}G 필요`);
+    return;
+  }
+  state.gold -= current.needGold;
+  state.stageIndex += 1;
+  addLog(`${stages[state.stageIndex].name} 단계로 승급했습니다`);
+  showToast(`${stages[state.stageIndex].name} 승급 성공`);
+  saveState();
+  render();
+}
+
+function enhanceWeapon() {
+  const cost = Math.floor(120 * Math.pow(1.55, state.weapon));
+  if (state.gold < cost) {
+    showToast(`강화 비용 부족: ${cost.toLocaleString()}G 필요`);
+    return;
+  }
+  state.gold -= cost;
+  const successRate = Math.max(0.35, 0.9 - state.weapon * 0.035);
+  if (Math.random() <= successRate) {
+    state.weapon += 1;
+    addLog(`무기 강화 성공: +${state.weapon}`);
+    showToast(`무기 +${state.weapon} 강화 성공`);
+  } else {
+    addLog("무기 강화 실패");
+    showToast("강화 실패");
+  }
+  saveState();
+  render();
+}
+
+function bossBattle() {
+  const bossPower = state.map * 22 + 80;
+  if (power() < bossPower) {
+    showToast(`전투력 부족: ${bossPower} 필요`);
+    addLog(`보스 도전 실패: 권장 전투력 ${bossPower}`);
+    return;
+  }
+  const reward = state.map * 180;
+  state.gold += reward;
+  state.map += 3;
+  state.monsterHp = monsterMaxHp();
+  addLog(`보스 처치 성공: ${reward.toLocaleString()}G 획득`);
+  showToast("보스 처치 성공");
+  saveState();
+  render();
+}
+
+function claimDaily() {
+  const last = Number(localStorage.getItem("idleMmorpgDaily") || 0);
+  const now = Date.now();
+  if (now - last < 1000 * 60 * 60 * 12) {
+    showToast("아직 받을 수 없습니다");
+    return;
+  }
+  const reward = 500 + state.level * 60;
+  state.gold += reward;
+  localStorage.setItem("idleMmorpgDaily", String(now));
+  showToast(`${reward.toLocaleString()}G 보상 획득`);
+  saveState();
+  render();
+}
+
+function resetGame() {
+  if (!confirm("게임 데이터를 초기화할까요?")) return;
+  state = { ...defaultState, lastSaved: Date.now() };
+  localStorage.removeItem("idleMmorpgSave");
+  localStorage.removeItem("idleMmorpgDaily");
+  render();
+}
+
+function showToast(text) {
+  const toast = $("toast");
+  toast.textContent = text;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+}
+
+function render() {
+  const stage = stages[state.stageIndex];
+  $("stageBadge").textContent = stage.name;
+  $("characterAvatar").textContent = stage.avatar;
+  $("heroTitle").textContent = stage.title;
+  $("heroDesc").textContent = stage.desc;
+  $("levelText").textContent = `Lv. ${state.level}`;
+  $("goldText").textContent = Math.floor(state.gold).toLocaleString();
+  $("powerText").textContent = power().toLocaleString();
+  $("mapText").textContent = state.map;
+  $("expText").textContent = `${Math.floor(state.exp).toLocaleString()} / ${expNeed().toLocaleString()}`;
+  $("expBar").style.width = `${Math.min(100, (state.exp / expNeed()) * 100)}%`;
+  $("monsterName").textContent = monsterName();
+  $("monsterAvatar").textContent = monsterName().replace(" ", "\n");
+  $("monsterHpText").textContent = `HP ${Math.max(0, Math.floor(state.monsterHp)).toLocaleString()} / ${monsterMaxHp().toLocaleString()}`;
+  $("monsterHpBar").style.width = `${Math.max(0, Math.min(100, (state.monsterHp / monsterMaxHp()) * 100))}%`;
+  $("evolutionText").textContent = `${state.stageIndex + 1} / ${stages.length}`;
+  $("weaponText").textContent = `+${state.weapon}`;
+  $("dpsText").textContent = power().toLocaleString();
+  const need = state.stageIndex >= stages.length - 1 ? "최종 단계" : `Lv. ${stage.needLevel} / ${stage.needGold.toLocaleString()}G`;
+  $("evolveNeedText").textContent = need;
+}
+
+$("evolveBtn").addEventListener("click", evolve);
+$("enhanceBtn").addEventListener("click", enhanceWeapon);
+$("bossBtn").addEventListener("click", bossBattle);
+$("claimBtn").addEventListener("click", claimDaily);
+$("resetBtn").addEventListener("click", resetGame);
+$("saveBtn").addEventListener("click", () => { saveState(); showToast("저장 완료"); });
+
+document.querySelectorAll(".bottom-nav button").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".bottom-nav button").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    const grid = document.querySelector(".game-grid");
+    grid.classList.remove("show-battle", "show-growth", "show-info");
+    if (btn.dataset.tab === "battle") grid.classList.add("show-battle");
+    if (btn.dataset.tab === "growth") grid.classList.add("show-growth");
+    if (btn.dataset.tab === "info") grid.classList.add("show-info");
+  });
+});
+
+window.addEventListener("beforeunload", saveState);
+render();
+addLog("자동 사냥을 시작했습니다");
+setInterval(battleTick, 1300);
