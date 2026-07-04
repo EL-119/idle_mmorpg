@@ -1115,3 +1115,49 @@ body > .create-close-fixed,
 }
 @keyframes fireHeroFrames{from{transform:translateX(0)}to{transform:translateX(-840px)}}
 @keyframes fireHeroBob{0%,100%{margin-bottom:0;transform:rotate(-1deg)}50%{margin-bottom:8px;transform:rotate(1deg)}}
+
+
+/* v49 FINAL: real player sprite replacement, not old CSS character */
+#playerSprite.fire-skin-v49,
+.stage #playerSprite.fire-skin-v49,
+div#playerSprite.player.fire-skin-v49{
+  position:absolute !important;
+  left:calc(23% - 76px) !important;
+  bottom:24px !important;
+  width:250px !important;
+  height:250px !important;
+  background:transparent url("player_fire_skin_sprite_v49.png") 0 0 / 1000px 250px no-repeat !important;
+  border-radius:0 !important;
+  overflow:hidden !important;
+  transform-origin:50% 100% !important;
+  filter:drop-shadow(0 16px 10px rgba(0,0,0,.58)) !important;
+  animation:fireSkinV49Frames .48s steps(4) infinite, fireSkinV49Bob .96s ease-in-out infinite !important;
+  image-rendering:auto !important;
+  z-index:3 !important;
+}
+#playerSprite.fire-skin-v49:before,
+#playerSprite.fire-skin-v49:after,
+#playerSprite.fire-skin-v49 .horn,
+#playerSprite.fire-skin-v49 .eye,
+#playerSprite.fire-skin-v49 .mouth,
+#playerSprite.fire-skin-v49 img{
+  display:none !important;
+  content:none !important;
+}
+@keyframes fireSkinV49Frames{
+  from{background-position:0 0}
+  to{background-position:-1000px 0}
+}
+@keyframes fireSkinV49Bob{
+  0%,100%{transform:translateY(0) rotate(-1deg) scale(1)}
+  50%{transform:translateY(-7px) rotate(1.2deg) scale(1.025)}
+}
+#playerSprite.fire-skin-v49.is-attacking,
+#playerSprite.fire-skin-v49.attack,
+.battle-scene.attacking #playerSprite.fire-skin-v49{
+  animation:fireSkinV49Frames .24s steps(4) infinite, fireSkinV49Attack .30s ease-in-out infinite !important;
+}
+@keyframes fireSkinV49Attack{
+  0%,100%{transform:translate(0,0) rotate(-2deg) scale(1)}
+  45%{transform:translate(20px,-8px) rotate(6deg) scale(1.06)}
+}
