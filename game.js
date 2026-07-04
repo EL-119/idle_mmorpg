@@ -1,11 +1,11 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v4';
+const SAVE_KEY='random_growth_game_v5';
 let state = null;
 let loop = null;
 let passiveTimer = null;
 let pendingChoices = [];
 let dataMode = 'export';
-const base = { hp:100, power:10, expNeed:100 };
+const base = { hp:100, power:10, expNeed:100, baseAttackMs:900 };
 
 function rand(max){ return Math.floor(Math.random()*max); }
 function nowSec(){ return Math.floor(Date.now()/1000); }
@@ -35,20 +35,20 @@ function makeMonster(){
   const lv=Math.max(1, Math.floor(1 + state.kills/5 + state.level*0.75));
   const names=['슬라임','뿔토끼','고블린','늑대','오크','트롤','오우거','키메라','마룡의 그림자'];
   const tier=Math.min(names.length-1, Math.floor(lv/12));
-  return { name:names[tier], level:lv, maxHp:1, hp:1, atk:Math.round(3+lv*1.4), hitCount:0, defense:0 };
+  return { name:names[tier], level:lv, maxHp:1, hp:1, atk:Math.round(3+lv*1.4), hitCount:0, defense:0, formTier:0 };
 }
 function growMonsterOnHit(){
   const m=state.monster; m.hitCount=(m.hitCount||0)+1;
   m.maxHp+=1; m.hp=Math.min(m.maxHp,m.hp+1);
-  const digits=Math.floor(Math.log10(Math.max(1,m.maxHp)));
-  m.defense=digits*100;
+  m.defense=Math.floor(m.maxHp/10);
+  m.formTier=monsterFormTier(m.defense);
 }
 
 function createCharacter(){
   const name=$('nameInput').value.trim() || '랜덤러';
   const first=rollSkill([]);
   first.level = 1;
-  state={ name, level:1, exp:0, hp:100, gold:0, kills:0, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now() };
+  state={ name, level:1, exp:0, hp:100, kills:0, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now() };
   state.monster=makeMonster();
   $('createModal').classList.remove('active');
   log(`${name} 생성 완료. 시작 패시브 ${first.gradeName} [${first.name}] 획득.`);
@@ -62,18 +62,18 @@ function passiveStacks(){
 function gradePower(g){ return {normal:1,magic:2,rare:3,unique:4,legend:5,epic:6,god:7}[g] || 1; }
 
 function calcStats(){
-  const stats={ maxHp:base.hp, power:base.power+state.level*2, expBonus:0, goldBonus:0, crit:3, speedBonus:0, autoStrike:[], regen:[], goldRain:[], expPulse:[] };
+  const stats={ maxHp:base.hp, power:base.power+state.level*2, crit:3, attackMs:base.baseAttackMs, autoStrike:[], regen:[], expPulse:[] };
   state.passives.forEach(s=>{
     const lv = Math.max(1, s.level || 1);
     if(s.statType==='power') stats.power+=s.value*lv;
     if(s.statType==='hp') stats.maxHp+=s.value*4*lv;
-    if(s.statType==='exp') stats.expBonus+=s.value*lv;
-    if(s.statType==='gold') stats.goldBonus+=s.value*lv;
     if(s.statType==='crit') stats.crit+=Math.max(1,Math.floor(s.value/2))*lv;
-    if(s.statType==='speed') stats.speedBonus+=Math.max(1,Math.floor(s.value/3))*lv;
-    if(['autoStrike','regen','goldRain','expPulse'].includes(s.statType)) stats[s.statType].push({...s, level: lv});
+    if(s.statType==='speed') stats.attackMs-=Math.max(8,Math.floor(s.value*2))*lv;
+    if(['autoStrike','regen','expPulse'].includes(s.statType)) stats[s.statType].push({...s, level: lv});
   });
   stats.maxHp=Math.round(stats.maxHp); stats.power=Math.round(stats.power); stats.crit=Math.min(85,stats.crit);
+  stats.attackMs=Math.max(220, Math.round(stats.attackMs));
+  stats.attackSpeed=+(1000/stats.attackMs).toFixed(2);
   return stats;
 }
 function needExp(){ return Math.round(base.expNeed*Math.pow(1.18,state.level-1)); }
@@ -101,9 +101,8 @@ function damageMonster(amount,prefix=''){
 function killMonster(){
   const st=calcStats();
   const expGain=0;
-  const goldGain=Math.round((5+state.monster.level*2)*(1+st.goldBonus/100));
-  state.exp+=expGain; state.gold+=goldGain; state.kills++;
-  log(`${state.monster.name} 처치. 누적 피해 경험치 보상, 골드 ${goldGain} 획득.`);
+  state.exp+=expGain; state.kills++;
+  log(`${state.monster.name} 처치. 누적 피해 경험치 보상.`);
   while(state.exp>=needExp()){
     state.exp-=needExp(); state.level++; state.hp=calcStats().maxHp;
     log(`레벨 ${state.level} 달성.`);
@@ -115,7 +114,7 @@ function tickPassiveSkills(){
   if(!state || !state.auto || pendingChoices.length) return;
   const st=calcStats();
   const t=nowSec();
-  ['autoStrike','regen','goldRain','expPulse'].forEach(type=>{
+  ['autoStrike','regen','expPulse'].forEach(type=>{
     st[type].forEach((s,idx)=>{
       const key=s.id;
       const last=state.lastPassiveTick[key] || 0;
@@ -130,11 +129,6 @@ function tickPassiveSkills(){
           const heal=Math.round(st.maxHp*(Math.min(35,s.value*s.level)/100));
           state.hp=Math.min(st.maxHp,state.hp+heal);
           log(`[${s.name}] 자동 발동. HP ${heal} 회복.`);
-        }
-        if(type==='goldRain'){
-          const gold=Math.round((s.value*s.level)+state.level*1.5);
-          state.gold+=gold;
-          log(`[${s.name}] 자동 발동. 골드 ${gold} 획득.`);
         }
         if(type==='expPulse'){
           const exp=Math.round((s.value*s.level)+state.level*2);
@@ -187,7 +181,7 @@ function render(){
   if(!state.monster) state.monster=makeMonster();
   $('charName').textContent=state.name;
   $('charTitle').textContent=`Lv. ${state.level} · ${titleByLevel(state.level)}`;
-  $('level').textContent=state.level; $('power').textContent=st.power; $('gold').textContent=state.gold; $('kills').textContent=state.kills;
+  $('level').textContent=state.level; $('attackPower').textContent=st.power; $('attackSpeed').textContent=`${st.attackSpeed}/s`; $('kills').textContent=state.kills;
   const stacksForCount=passiveStacks();
   $('passiveCount').textContent=stacksForCount.length; $('stackCount').textContent=stacksForCount.reduce((a,s)=>a+(s.level||1),0);
   $('hpText').textContent=`${Math.round(state.hp)} / ${st.maxHp}`; $('hpBar').style.width=`${Math.min(100,state.hp/st.maxHp*100)}%`;
@@ -197,9 +191,19 @@ function render(){
   $('monsterName').textContent=state.monster.name;
   $('monsterLevelText').textContent=`몬스터 Lv. ${state.monster.level} · 방어력 ${state.monster.defense||0}`;
   $('zoneText').textContent=`${zoneName()} ${Math.max(1,Math.floor(state.monster.level/10)+1)}구역`;
-  $('monsterHpText').textContent=`HP ${Math.max(0,Math.round(state.monster.hp))} / ${state.monster.maxHp} · 피격 ${state.monster.hitCount||0}회`;
+  $('monsterHpText').textContent=`HP ${Math.max(0,Math.round(state.monster.hp))} / ${state.monster.maxHp} · 방어 ${state.monster.defense||0} · 피격 ${state.monster.hitCount||0}회`;
   $('monsterHpBar').style.width=`${Math.max(0,Math.min(100,state.monster.hp/state.monster.maxHp*100))}%`;
+  renderMonsterForm();
   renderPassives();
+}
+function monsterFormTier(defense){
+  if(defense < 1) return 0;
+  return Math.min(7, Math.floor(Math.log10(Math.max(1, defense))) + 1);
+}
+function renderMonsterForm(){
+  const e=$('enemySprite');
+  if(!e || !state?.monster) return;
+  e.className='enemy monster-tier-' + monsterFormTier(state.monster.defense||0);
 }
 function displayClass(s){ return (s.level||1)>=10 ? 'normal' : s.gradeClass; }
 function renderPassives(){
@@ -227,19 +231,24 @@ function migrate(s){
   }else{
     s.passives=[];
   }
+  if(typeof s.kills!=='number') s.kills=0;
+  if(typeof s.hp!=='number') s.hp=100;
+  delete s.gold;
   state=s;
   if(!state.monster) state.monster=makeMonster();
+  if(typeof state.monster.defense!=='number') state.monster.defense=Math.floor((state.monster.maxHp||1)/10);
+  state.monster.formTier=monsterFormTier(state.monster.defense||0);
   return state;
 }
 function load(){
-  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
+  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
   if(!raw) return false;
   try{ state=JSON.parse(raw); state=migrate(state); $('createModal').classList.remove('active'); render(); startLoop(); log('저장 데이터를 불러왔습니다.'); return true; }catch(e){ return false; }
 }
-function startLoop(){ clearInterval(loop); clearInterval(passiveTimer); const st=calcStats(); loop=setInterval(hunt, Math.max(280,900-(st.speedBonus*5))); passiveTimer=setInterval(tickPassiveSkills,1000); }
+function startLoop(){ clearInterval(loop); clearInterval(passiveTimer); const st=calcStats(); loop=setInterval(hunt, st.attackMs); passiveTimer=setInterval(tickPassiveSkills,1000); }
 
 $('createBtn').onclick=createCharacter;
-$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ localStorage.removeItem(SAVE_KEY); localStorage.removeItem('random_growth_game_v2'); localStorage.removeItem('random_growth_game_v1'); location.reload(); } };
+$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ localStorage.removeItem(SAVE_KEY); localStorage.removeItem('random_growth_game_v4'); localStorage.removeItem('random_growth_game_v3'); localStorage.removeItem('random_growth_game_v2'); localStorage.removeItem('random_growth_game_v1'); location.reload(); } };
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
 $('passiveBtn').onclick=()=>{$('passiveModal').classList.add('active'); renderPassives();};
