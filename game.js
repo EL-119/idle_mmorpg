@@ -123,6 +123,8 @@ function killMonster(){
   const st=calcStats();
   const expGain=0;
   state.exp+=expGain; state.kills++;
+  state.hp=Math.min(calcStats().maxHp, state.hp + 10);
+  log('처치 보상: 체력 +10');
   log(`${state.monster.name} 처치. 누적 피해 경험치 보상.`);
   while(state.exp>=needExp()){
     state.exp-=needExp(); state.level++; state.hp=calcStats().maxHp;
