@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v31';
+const SAVE_KEY='random_growth_game_v32';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -44,7 +44,8 @@ function isRealLocalPlayer(obj){
   if(!obj || !obj.name || !obj.id) return false;
   if(isFakePlayerName(obj.name)) return false;
   if(obj.isDummy===true || obj.fake===true || obj.npc===true) return false;
-  return true;
+  // 랭킹은 서버 연동 전까지 현재 저장된 실제 플레이 캐릭터 1명만 허용한다.
+  return obj.localHumanPlayer===true && obj.rankingEligible===true;
 }
 function clearFakeRankingCaches(){
   // 랭킹은 실제 현재 캐릭터만 표시한다. 과거 버전의 더미/가짜 랭킹 캐시는 전부 삭제한다.
@@ -118,11 +119,15 @@ function growMonsterOnHit(){
 
 
 function createCharacter(){
+  // 실제로 생성 버튼을 누른 순간에만 기존 캐릭터를 새 캐릭터로 교체한다.
+  clearInterval(loop);
+  clearInterval(passiveTimer);
   const name=makeRandomName();
   const first=rollSkill([]);
   first.level = 1;
-  state={ id:'player_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now(), localHumanPlayer:true, rankingEligible:true, saveVersion:31 };
+  state={ id:'player_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now(), localHumanPlayer:true, rankingEligible:true, saveVersion:32 };
   state.monster=makeMonster();
+  newCharacterModalMode=false;
   $('createModal').classList.remove('active');
   log(`${name} 생성 완료. 시작 패시브 ${first.gradeName} [${first.name}] 획득.`);
   save(); render(); startLoop();
@@ -462,9 +467,10 @@ function sanitizeSkill(skill){
 
 function migrate(s){
   if(!s.lastPassiveTick) s.lastPassiveTick={};
-  if(s && s.name && s.id && !isFakePlayerName(s.name)){
-    s.localHumanPlayer = true;
-    s.rankingEligible = true;
+  if(s && s.name && s.id && !isFakePlayerName(s.name) && s.isDummy!==true && s.fake!==true && s.npc!==true){
+    // 기존 내 저장 데이터는 유지하되, 더미 랭킹 이름은 절대 실제 유저로 승격하지 않는다.
+    s.localHumanPlayer = s.localHumanPlayer !== false;
+    s.rankingEligible = s.rankingEligible !== false;
     s.isDummy = false;
     s.fake = false;
     s.npc = false;
@@ -512,7 +518,8 @@ $('createBtn').onclick=createCharacter;
 function closeCreateModal(){
   const m=$('createModal');
   if(m) m.classList.remove('active');
-  if(state){ render(); startLoop(); }
+  newCharacterModalMode=false;
+  if(state){ state.auto=true; save(); render(); startLoop(); }
 }
 if($('createCloseBottom')) $('createCloseBottom').onclick=closeCreateModal;
 
@@ -526,7 +533,15 @@ document.addEventListener('click', (e)=>{
   if(btn){ closeModalById(btn.dataset.closeModal); }
 });
 
-$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v31','random_growth_game_v30','random_growth_game_v28','random_growth_game_v27','random_growth_game_v26','random_growth_game_v25','random_growth_game_v24','random_growth_game_v23','random_growth_game_v22','random_growth_game_v21','random_growth_game_v20','random_growth_game_v19','random_growth_game_v18','random_growth_game_v17','random_growth_game_v16','random_growth_game_v15','random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
+$('newCharBtn').onclick=()=>{
+  if(!confirm('새 캐릭터 생성창을 열까요? 실제 생성 버튼을 누르기 전까지 현재 캐릭터는 유지됩니다.')) return;
+  newCharacterModalMode=true;
+  // 기존 캐릭터와 자동 사냥은 유지한 상태로 생성창만 연다. 닫으면 바로 이어서 사냥한다.
+  $('choiceModal').classList.remove('active');
+  $('passiveModal').classList.remove('active');
+  $('dataModal').classList.remove('active');
+  $('createModal').classList.add('active');
+};
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
 $('passiveBtn').onclick=()=>{$('passiveModal').classList.add('active'); renderPassives();};

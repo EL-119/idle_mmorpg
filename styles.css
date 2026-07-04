@@ -763,3 +763,27 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
 .modal-x{display:inline-flex!important;align-items:center;justify-content:center;min-width:56px;height:36px;background:linear-gradient(135deg,#7c3aed,#db2777)!important;color:#fff!important;position:absolute;top:14px;right:14px;z-index:100002!important;opacity:1!important;visibility:visible!important;}
 .create-close-fixed{position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 14px)!important;right:14px!important;z-index:100001!important;background:linear-gradient(135deg,#7c3aed,#db2777)!important;color:#fff!important;border:1px solid rgba(255,255,255,.32)!important;box-shadow:0 10px 30px rgba(0,0,0,.55)!important;padding:10px 14px!important;border-radius:14px!important;font-weight:900!important;display:block!important;opacity:1!important;visibility:visible!important;}
 .empty-rank{padding:18px;border-radius:16px;background:#120e1d;color:#d6c7ef;line-height:1.55;text-align:center;}
+
+
+/* v32: create modal close cleanup - only the bottom '창 닫기' button is visible */
+.create-close-fixed,
+#createModal .modal-x,
+#createModal .create-close-fixed,
+#createModal [id^="createCloseTop"],
+#createModal [data-extra-create-close="true"]{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+#createCloseBottom{
+  display:block!important;
+  width:100%!important;
+  margin-top:10px!important;
+  position:static!important;
+  background:#2b2241!important;
+  color:#fff!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+#createModal .modal-title{position:static!important;padding:0!important;background:transparent!important;}
