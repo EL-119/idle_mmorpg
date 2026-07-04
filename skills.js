@@ -42,19 +42,11 @@ function makeSkillPool(){
     const autoQuota=AUTO_STRIKE_QUOTA[g.key] || 0;
     const scale=GRADE_SCALE[g.key] || 1;
     const autoScale=GRADE_AUTO_SCALE[g.key] || scale;
-    const usedNames={};
     for(let i=1;i<=g.count;i++){
-      const prefix=PREFIX[g.key][(i-1)%PREFIX[g.key].length];
+      const p=PREFIX[g.key][(i-1)%PREFIX[g.key].length];
       const statType = i <= autoQuota ? 'autoStrike' : TYPES[(i-autoQuota-1)%TYPES.length];
       const suffixes=SUFFIX_BY_TYPE[statType] || ['전투감각'];
-      const suffix=suffixes[(i-1)%suffixes.length];
-      let skillName=`${prefix} ${suffix}`;
-      if(usedNames[skillName]){
-        usedNames[skillName]+=1;
-        skillName=`${skillName} ${usedNames[skillName]}식`;
-      }else{
-        usedNames[skillName]=1;
-      }
+      const s=suffixes[(i-1)%suffixes.length];
       const rawBase = statType === 'autoStrike'
         ? (8 + i*3) * autoScale
         : (4 + i*1.7 + ((i%7)*3)) * scale;
@@ -65,7 +57,7 @@ function makeSkillPool(){
       const interval=Math.max(1.2, +(6.5 - Math.min(4.8, Math.log2(scale+1)) + ((i%3)*0.25)).toFixed(1));
       pool.push({
         id:`${g.key}_${i}`,
-        name:skillName,
+        name:`${p} ${s}`,
         grade:g.key,
         gradeName:g.name,
         gradeClass:g.cls,
