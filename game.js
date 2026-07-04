@@ -219,7 +219,7 @@ function render(){
   updatePlayerVisual(stacksForCount);
   $('aura').style.opacity = auraOpacity(stacksForCount);
   $('monsterName').textContent=state.monster.name;
-  $('monsterLevelText').textContent=`몬스터 Lv. ${state.monster.level} · 방어력 ${state.monster.defense||0}`;
+  $('monsterLevelText').textContent=`몬스터 Lv. ${state.monster.level}`;
   $('zoneText').textContent=`${zoneName()} ${Math.max(1,Math.floor(state.monster.level/10)+1)}구역`;
   $('monsterHpText').textContent=`HP ${Math.max(0,Math.round(state.monster.hp))} / ${state.monster.maxHp} · 방어 ${state.monster.defense||0} · 피격 ${state.monster.hitCount||0}회`;
   $('monsterHpBar').style.width=`${Math.max(0,Math.min(100,state.monster.hp/state.monster.maxHp*100))}%`;
@@ -384,6 +384,10 @@ $('missionBtn').onclick=()=>{ renderMissions(); $('missionModal').classList.add(
 $('missionPanelBtn').onclick=()=>{ renderMissions(); $('missionModal').classList.add('active'); };
 $('noticeClose').onclick=()=>$('noticeModal').classList.remove('active');
 $('missionClose').onclick=()=>$('missionModal').classList.remove('active');
+
+if($('supportBtn')) $('supportBtn').onclick=()=> $('supportModal').classList.add('active');
+if($('supportClose')) $('supportClose').onclick=()=> $('supportModal').classList.remove('active');
+
 $('exportBtn').onclick=()=>{ dataMode='export'; $('dataTitle').textContent='저장 데이터 내보내기'; $('dataBox').value=btoa(unescape(encodeURIComponent(JSON.stringify(state)))); $('dataApply').style.display='none'; $('dataModal').classList.add('active'); };
 $('importBtn').onclick=()=>{ dataMode='import'; $('dataTitle').textContent='저장 데이터 가져오기'; $('dataBox').value=''; $('dataApply').style.display='inline-block'; $('dataModal').classList.add('active'); };
 $('dataClose').onclick=()=>$('dataModal').classList.remove('active');
