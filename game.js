@@ -1,11 +1,14 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v5';
+const SAVE_KEY='random_growth_game_v6';
 let state = null;
 let loop = null;
 let passiveTimer = null;
 let pendingChoices = [];
 let dataMode = 'export';
 const base = { hp:100, power:10, expNeed:100, baseAttackMs:900 };
+const RANDOM_NAME_PREFIX=['검은','붉은','푸른','황금','은빛','그림자','폭풍','심연','새벽','혼돈','운명의','떠도는','작은','거대한'];
+const RANDOM_NAME_BODY=['슬라임','고블린','오크','트롤','키메라','마수','망령','용아','불씨','늑대','거인','마검','별조각','왕눈이'];
+const RANDOM_NAME_SUFFIX=['씨앗','초보자','방랑자','각성체','행운아','포식자','도전자','계승자','수집가','생존자'];
 
 function rand(max){ return Math.floor(Math.random()*max); }
 function nowSec(){ return Math.floor(Date.now()/1000); }
@@ -31,24 +34,40 @@ function rollChoices(){
   }
   return picked;
 }
+function makeRandomName(){
+  return RANDOM_NAME_PREFIX[rand(RANDOM_NAME_PREFIX.length)] + ' ' + RANDOM_NAME_BODY[rand(RANDOM_NAME_BODY.length)] + ' ' + RANDOM_NAME_SUFFIX[rand(RANDOM_NAME_SUFFIX.length)];
+}
+function currentEnemyMaxHp(){
+  state.enemyMaxHp=Math.max(1, Math.floor(state.enemyMaxHp || 1));
+  return state.enemyMaxHp;
+}
+function defenseFromHp(maxHp){ return Math.floor(Math.max(1, maxHp)/10); }
 function makeMonster(){
-  const lv=Math.max(1, Math.floor(1 + state.kills/5 + state.level*0.75));
-  const names=['슬라임','뿔토끼','고블린','늑대','오크','트롤','오우거','키메라','마룡의 그림자'];
-  const tier=Math.min(names.length-1, Math.floor(lv/12));
-  return { name:names[tier], level:lv, maxHp:1, hp:1, atk:Math.round(3+lv*1.4), hitCount:0, defense:0, formTier:0 };
+  const maxHp=currentEnemyMaxHp();
+  const defense=defenseFromHp(maxHp);
+  const lv=Math.max(1, Math.floor(1 + state.kills/5 + state.level*0.75 + Math.log10(maxHp)));
+  const names=['슬라임','뿔토끼','고블린','늑대','오크','트롤','오우거','키메라','마룡의 그림자','고대 재앙'];
+  const tier=Math.min(names.length-1, monsterFormTier(defense));
+  return { name:names[tier], level:lv, maxHp:maxHp, hp:maxHp, atk:Math.round(3+lv*1.4), hitCount:0, defense:defense, formTier:monsterFormTier(defense) };
 }
 function growMonsterOnHit(){
-  const m=state.monster; m.hitCount=(m.hitCount||0)+1;
-  m.maxHp+=1; m.hp=Math.min(m.maxHp,m.hp+1);
-  m.defense=Math.floor(m.maxHp/10);
+  state.enemyMaxHp=Math.max(1, Math.floor(state.enemyMaxHp || state.monster?.maxHp || 1)) + 1;
+  const m=state.monster;
+  if(!m) return;
+  m.hitCount=(m.hitCount||0)+1;
+  m.maxHp=state.enemyMaxHp;
+  m.hp+=1;
+  m.defense=defenseFromHp(m.maxHp);
   m.formTier=monsterFormTier(m.defense);
+  const names=['슬라임','뿔토끼','고블린','늑대','오크','트롤','오우거','키메라','마룡의 그림자','고대 재앙'];
+  m.name=names[Math.min(names.length-1, m.formTier)];
 }
 
 function createCharacter(){
-  const name=$('nameInput').value.trim() || '랜덤러';
+  const name=makeRandomName();
   const first=rollSkill([]);
   first.level = 1;
-  state={ name, level:1, exp:0, hp:100, kills:0, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now() };
+  state={ name, level:1, exp:0, hp:100, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now() };
   state.monster=makeMonster();
   $('createModal').classList.remove('active');
   log(`${name} 생성 완료. 시작 패시브 ${first.gradeName} [${first.name}] 획득.`);
@@ -76,7 +95,7 @@ function calcStats(){
   stats.attackSpeed=+(1000/stats.attackMs).toFixed(2);
   return stats;
 }
-function needExp(){ return Math.round(base.expNeed*Math.pow(1.18,state.level-1)); }
+function needExp(){ return Math.max(1, Math.round(base.expNeed*Math.pow(1.18,state.level-1)/2)); }
 
 function hunt(){
   if(!state || !state.auto || pendingChoices.length) return;
@@ -90,13 +109,14 @@ function hunt(){
   save(); render();
 }
 function damageMonster(amount,prefix=''){
+  growMonsterOnHit();
   const actual=Math.max(1, amount-(state.monster.defense||0));
   state.monster.hp-=actual;
   const expGain=actual; state.exp+=expGain;
   showHit(`${prefix}-${actual} · EXP +${expGain}`);
 
   $('enemySprite').classList.add('shake'); setTimeout(()=>$('enemySprite').classList.remove('shake'),260);
-  if(state.monster.hp<=0) killMonster(); else growMonsterOnHit();
+  if(state.monster.hp<=0) killMonster();
 }
 function killMonster(){
   const st=calcStats();
@@ -233,22 +253,24 @@ function migrate(s){
   }
   if(typeof s.kills!=='number') s.kills=0;
   if(typeof s.hp!=='number') s.hp=100;
+  if(typeof s.enemyMaxHp!=='number') s.enemyMaxHp=Math.max(1, s.monster?.maxHp || 1);
   delete s.gold;
   state=s;
   if(!state.monster) state.monster=makeMonster();
-  if(typeof state.monster.defense!=='number') state.monster.defense=Math.floor((state.monster.maxHp||1)/10);
+  state.monster.maxHp=Math.max(state.enemyMaxHp || 1, state.monster.maxHp || 1);
+  state.monster.defense=defenseFromHp(state.monster.maxHp);
   state.monster.formTier=monsterFormTier(state.monster.defense||0);
   return state;
 }
 function load(){
-  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
+  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v5') || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
   if(!raw) return false;
   try{ state=JSON.parse(raw); state=migrate(state); $('createModal').classList.remove('active'); render(); startLoop(); log('저장 데이터를 불러왔습니다.'); return true; }catch(e){ return false; }
 }
 function startLoop(){ clearInterval(loop); clearInterval(passiveTimer); const st=calcStats(); loop=setInterval(hunt, st.attackMs); passiveTimer=setInterval(tickPassiveSkills,1000); }
 
 $('createBtn').onclick=createCharacter;
-$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ localStorage.removeItem(SAVE_KEY); localStorage.removeItem('random_growth_game_v4'); localStorage.removeItem('random_growth_game_v3'); localStorage.removeItem('random_growth_game_v2'); localStorage.removeItem('random_growth_game_v1'); location.reload(); } };
+$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
 $('passiveBtn').onclick=()=>{$('passiveModal').classList.add('active'); renderPassives();};
