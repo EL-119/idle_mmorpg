@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v31';
+const SAVE_KEY='random_growth_game_v28';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -35,32 +35,16 @@ function nextZone(){
 
 function rand(max){ return Math.floor(Math.random()*max); }
 function nowSec(){ return Math.floor(Date.now()/1000); }
-
-function isFakePlayerName(name){
-  const fakeNames=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자','불멸자','패시브황','초월러너'];
-  return fakeNames.includes(String(name||'').trim());
-}
-function isRealLocalPlayer(obj){
-  if(!obj || !obj.name || !obj.id) return false;
-  if(isFakePlayerName(obj.name)) return false;
-  if(obj.isDummy===true || obj.fake===true || obj.npc===true) return false;
-  return true;
-}
 function clearFakeRankingCaches(){
-  // 랭킹은 실제 현재 캐릭터만 표시한다. 과거 버전의 더미/가짜 랭킹 캐시는 전부 삭제한다.
-  const fakeNames=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자','불멸자','패시브황','초월러너','마왕도전자'];
+  const fakeNames=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자'];
   try{
     for(let i=localStorage.length-1;i>=0;i--){
       const k=localStorage.key(i);
       const v=localStorage.getItem(k)||'';
-      const isOldSave=/^random_growth_game_v(1[0-9]|2[0-9]|30|[1-9])$/.test(k);
-      const isRankCache=/rank|ranking|leader|score|dummy|fake/i.test(k);
-      const hasFakeName=fakeNames.some(n=>v.includes(n));
-      if(isOldSave || isRankCache || hasFakeName) localStorage.removeItem(k);
+      if(/rank|ranking|leader/i.test(k) || fakeNames.some(n=>v.includes(n))){ localStorage.removeItem(k); }
     }
   }catch(e){}
 }
-
 function log(msg){ const el=$('log'); el.innerHTML = `<div>${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} · ${msg}</div>` + el.innerHTML; }
 
 function weightedGrade(){
@@ -121,7 +105,7 @@ function createCharacter(){
   const name=makeRandomName();
   const first=rollSkill([]);
   first.level = 1;
-  state={ id:'player_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now(), localHumanPlayer:true, rankingEligible:true, saveVersion:31 };
+  state={ id:'player_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now() };
   state.monster=makeMonster();
   $('createModal').classList.remove('active');
   log(`${name} 생성 완료. 시작 패시브 ${first.gradeName} [${first.name}] 획득.`);
@@ -420,10 +404,15 @@ function renderMissions(){
 let currentRankMode='level';
 function buildRankingRows(mode='level'){
   clearFakeRankingCaches();
-  if(!isRealLocalPlayer(state)) return [];
-  const z=currentZone();
-  const row={rank:1,name:state.name,level:Math.max(1,state.level||1),zone:z.name,zoneIndex:z.index,me:true};
-  return [row];
+  const rows=[];
+  if(state && state.createdAt && state.name && state.passives && state.passives.length){
+    if(!state.id) state.id='player_'+(state.createdAt||Date.now());
+    const z=currentZone();
+    rows.push({name:state.name, level:Math.max(1,state.level||1), zone:z.name, zoneIndex:z.index, me:true});
+  }
+  if(mode==='zone') rows.sort((a,b)=>(b.zoneIndex-a.zoneIndex)||(b.level-a.level));
+  else rows.sort((a,b)=>b.level-a.level);
+  return rows.slice(0,30).map((r,i)=>({...r, rank:i+1}));
 }
 function renderRanking(mode=currentRankMode){
   currentRankMode=mode;
@@ -462,13 +451,6 @@ function sanitizeSkill(skill){
 
 function migrate(s){
   if(!s.lastPassiveTick) s.lastPassiveTick={};
-  if(s && s.name && s.id && !isFakePlayerName(s.name)){
-    s.localHumanPlayer = true;
-    s.rankingEligible = true;
-    s.isDummy = false;
-    s.fake = false;
-    s.npc = false;
-  }
   if(Array.isArray(s.passives)){
     const merged={};
     s.passives.forEach(p=>{
@@ -492,14 +474,9 @@ function migrate(s){
   return state;
 }
 function load(){
-  const raw=localStorage.getItem(SAVE_KEY);
+  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v26') || localStorage.getItem('random_growth_game_v25') || localStorage.getItem('random_growth_game_v24') || localStorage.getItem('random_growth_game_v23') || localStorage.getItem('random_growth_game_v22') || localStorage.getItem('random_growth_game_v21') || localStorage.getItem('random_growth_game_v20') || localStorage.getItem('random_growth_game_v19') || localStorage.getItem('random_growth_game_v18') || localStorage.getItem('random_growth_game_v17') || localStorage.getItem('random_growth_game_v16') || localStorage.getItem('random_growth_game_v15') || localStorage.getItem('random_growth_game_v14') || localStorage.getItem('random_growth_game_v13') || localStorage.getItem('random_growth_game_v12') || localStorage.getItem('random_growth_game_v11') || localStorage.getItem('random_growth_game_v10') || localStorage.getItem('random_growth_game_v9') || localStorage.getItem('random_growth_game_v8') || localStorage.getItem('random_growth_game_v7') || localStorage.getItem('random_growth_game_v6') || localStorage.getItem('random_growth_game_v5') || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
   if(!raw) return false;
-  try{
-    state=JSON.parse(raw);
-    state=migrate(state);
-    if(!isRealLocalPlayer(state)){ localStorage.removeItem(SAVE_KEY); state=null; return false; }
-    $('createModal').classList.remove('active'); render(); startLoop(); log('저장 데이터를 불러왔습니다.'); return true;
-  }catch(e){ return false; }
+  try{ state=JSON.parse(raw); state=migrate(state); $('createModal').classList.remove('active'); render(); startLoop(); log('저장 데이터를 불러왔습니다.'); return true; }catch(e){ return false; }
 }
 function startLoop(){ clearInterval(loop); clearInterval(passiveTimer); const st=calcStats(); loop=setInterval(hunt, st.attackMs); passiveTimer=setInterval(tickPassiveSkills,1000); }
 
@@ -509,24 +486,8 @@ const statusBtn=$('statusBtn');
 if(statusBtn){ statusBtn.onclick=openStatusDetail; }
 
 $('createBtn').onclick=createCharacter;
-function closeCreateModal(){
-  const m=$('createModal');
-  if(m) m.classList.remove('active');
-  if(state){ render(); startLoop(); }
-}
-if($('createCloseBottom')) $('createCloseBottom').onclick=closeCreateModal;
-
-function closeModalById(id){
-  const m=$(id);
-  if(m) m.classList.remove('active');
-  if(id==='createModal' && state){ render(); startLoop(); }
-}
-document.addEventListener('click', (e)=>{
-  const btn=e.target.closest('[data-close-modal]');
-  if(btn){ closeModalById(btn.dataset.closeModal); }
-});
-
-$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v31','random_growth_game_v30','random_growth_game_v28','random_growth_game_v27','random_growth_game_v26','random_growth_game_v25','random_growth_game_v24','random_growth_game_v23','random_growth_game_v22','random_growth_game_v21','random_growth_game_v20','random_growth_game_v19','random_growth_game_v18','random_growth_game_v17','random_growth_game_v16','random_growth_game_v15','random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
+if($('createClose')) $('createClose').onclick=()=>$('createModal').classList.remove('active');
+$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v28','random_growth_game_v27','random_growth_game_v26','random_growth_game_v25','random_growth_game_v24','random_growth_game_v23','random_growth_game_v22','random_growth_game_v21','random_growth_game_v20','random_growth_game_v19','random_growth_game_v18','random_growth_game_v17','random_growth_game_v16','random_growth_game_v15','random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
 $('passiveBtn').onclick=()=>{$('passiveModal').classList.add('active'); renderPassives();};
