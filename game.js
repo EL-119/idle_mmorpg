@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v3';
+const SAVE_KEY='random_growth_game_v4';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -35,9 +35,13 @@ function makeMonster(){
   const lv=Math.max(1, Math.floor(1 + state.kills/5 + state.level*0.75));
   const names=['슬라임','뿔토끼','고블린','늑대','오크','트롤','오우거','키메라','마룡의 그림자'];
   const tier=Math.min(names.length-1, Math.floor(lv/12));
-  const maxHp=Math.round(34*Math.pow(1.095,lv-1) + lv*15 + state.kills*1.5);
-  const atk=Math.round(3 + lv*1.4 + Math.pow(lv,1.08));
-  return { name:names[tier], level:lv, maxHp, hp:maxHp, atk };
+  return { name:names[tier], level:lv, maxHp:1, hp:1, atk:Math.round(3+lv*1.4), hitCount:0, defense:0 };
+}
+function growMonsterOnHit(){
+  const m=state.monster; m.hitCount=(m.hitCount||0)+1;
+  m.maxHp+=1; m.hp=Math.min(m.maxHp,m.hp+1);
+  const digits=Math.floor(Math.log10(Math.max(1,m.maxHp)));
+  m.defense=digits*100;
 }
 
 function createCharacter(){
@@ -86,17 +90,20 @@ function hunt(){
   save(); render();
 }
 function damageMonster(amount,prefix=''){
-  state.monster.hp-=amount;
-  showHit(`${prefix}-${amount}`);
+  const actual=Math.max(1, amount-(state.monster.defense||0));
+  state.monster.hp-=actual;
+  const expGain=actual; state.exp+=expGain;
+  showHit(`${prefix}-${actual} · EXP +${expGain}`);
+
   $('enemySprite').classList.add('shake'); setTimeout(()=>$('enemySprite').classList.remove('shake'),260);
-  if(state.monster.hp<=0) killMonster();
+  if(state.monster.hp<=0) killMonster(); else growMonsterOnHit();
 }
 function killMonster(){
   const st=calcStats();
-  const expGain=Math.round((18+state.monster.level*4)*(1+st.expBonus/100));
+  const expGain=0;
   const goldGain=Math.round((5+state.monster.level*2)*(1+st.goldBonus/100));
   state.exp+=expGain; state.gold+=goldGain; state.kills++;
-  log(`${state.monster.name} 처치. 경험치 ${expGain}, 골드 ${goldGain} 획득.`);
+  log(`${state.monster.name} 처치. 누적 피해 경험치 보상, 골드 ${goldGain} 획득.`);
   while(state.exp>=needExp()){
     state.exp-=needExp(); state.level++; state.hp=calcStats().maxHp;
     log(`레벨 ${state.level} 달성.`);
@@ -153,7 +160,7 @@ function openChoice(){
     const ownedSkill=state.passives.find(p=>p.id===s.id);
     const owned=ownedSkill ? Math.max(1, ownedSkill.level || 1) : 0;
     const btn=document.createElement('button'); btn.className='choice-card';
-    btn.innerHTML=`<b><span class="${s.gradeClass}">${s.name}</span><em class="grade ${s.gradeClass}">${s.gradeName}</em></b><p>${s.desc}</p><small>현재 Lv.${owned || 0} · 선택 시 Lv.${owned+1}</small>`;
+    btn.innerHTML=`<b><span class="${displayClass(s)}">${s.name}</span><em class="grade ${displayClass(s)}">${s.gradeName}</em></b><p>${s.desc}</p><small>현재 Lv.${owned || 0} · 선택 시 Lv.${owned+1}</small>`;
     btn.onclick=()=>chooseSkill(s);
     box.appendChild(btn);
   });
@@ -188,18 +195,19 @@ function render(){
   $('huntBtn').textContent=state.auto?'자동 사냥 중':'자동 사냥 정지';
   $('aura').style.opacity = hasHighGrade() ? .55 : .22;
   $('monsterName').textContent=state.monster.name;
-  $('monsterLevelText').textContent=`몬스터 Lv. ${state.monster.level}`;
+  $('monsterLevelText').textContent=`몬스터 Lv. ${state.monster.level} · 방어력 ${state.monster.defense||0}`;
   $('zoneText').textContent=`${zoneName()} ${Math.max(1,Math.floor(state.monster.level/10)+1)}구역`;
-  $('monsterHpText').textContent=`HP ${Math.max(0,Math.round(state.monster.hp))} / ${state.monster.maxHp}`;
+  $('monsterHpText').textContent=`HP ${Math.max(0,Math.round(state.monster.hp))} / ${state.monster.maxHp} · 피격 ${state.monster.hitCount||0}회`;
   $('monsterHpBar').style.width=`${Math.max(0,Math.min(100,state.monster.hp/state.monster.maxHp*100))}%`;
   renderPassives();
 }
+function displayClass(s){ return (s.level||1)>=10 ? 'normal' : s.gradeClass; }
 function renderPassives(){
   const stacks=passiveStacks();
-  $('quickPassiveList').innerHTML=stacks.slice(0,4).map(s=>`<div class="passive mini"><b><span class="${s.gradeClass}">${s.name}</span><em>Lv.${s.level}</em></b><p>${s.gradeName} · ${s.desc}</p></div>`).join('') || '<p class="empty">아직 패시브가 없습니다.</p>';
+  $('quickPassiveList').innerHTML=stacks.slice(0,4).map(s=>`<div class="passive mini"><b><span class="${displayClass(s)}">${s.name}</span><em>Lv.${s.level}</em></b><p>${s.gradeName} · ${s.desc}</p></div>`).join('') || '<p class="empty">아직 패시브가 없습니다.</p>';
   const totalLv=stacks.reduce((a,s)=>a+(s.level||1),0);
   $('passiveSummary').innerHTML=`고유 패시브 ${stacks.length}종 · 총 패시브 레벨 ${totalLv} · 같은 스킬 선택 시 레벨 상승`; 
-  $('passiveList').innerHTML=stacks.map(s=>`<div class="passive"><b><span class="${s.gradeClass}">${s.name}</span><em class="grade ${s.gradeClass}">${s.gradeName} Lv.${s.level}</em></b><p>${s.desc}</p></div>`).join('');
+  $('passiveList').innerHTML=stacks.map(s=>`<div class="passive"><b><span class="${displayClass(s)}">${s.name}</span><em class="grade ${displayClass(s)}">${s.gradeName} Lv.${s.level}</em></b><p>${s.desc}</p></div>`).join('');
 }
 function titleByLevel(lv){ if(lv>=100)return '신화적 존재'; if(lv>=80)return '운명을 찢는 존재'; if(lv>=60)return '초월자'; if(lv>=40)return '군림자'; if(lv>=20)return '각성체'; if(lv>=10)return '성장체'; return '새싹 존재'; }
 function zoneName(){ const lv=state.monster.level; if(lv>=80)return '종말'; if(lv>=60)return '마계'; if(lv>=40)return '심연'; if(lv>=20)return '황무지'; return '초원'; }
