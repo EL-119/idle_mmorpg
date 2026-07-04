@@ -1,89 +1,101 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>황제의 길 - 방치형 MMORPG</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>황제의 길</title>
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar">
+    <header class="top-bar">
       <div>
         <p class="eyebrow">IDLE WEB MMORPG</p>
         <h1>황제의 길</h1>
       </div>
-      <button id="saveBtn" class="ghost-btn">저장</button>
+      <button id="saveBtn" class="icon-btn">저장</button>
     </header>
 
-    <main class="game-grid">
-      <section class="panel hero-panel">
-        <div class="stage-badge" id="stageBadge">주민</div>
-        <div class="character-card" id="characterCard">
-          <div class="aura"></div>
-          <div class="character" id="characterAvatar">民</div>
-        </div>
-        <h2 id="heroTitle">떠돌이 주민</h2>
-        <p id="heroDesc">작은 마을에서 시작해 황제가 되는 길을 걷습니다.</p>
+    <main class="game-screen">
+      <section class="stage-card">
+        <div class="sky-orb orb-one"></div>
+        <div class="sky-orb orb-two"></div>
+        <div class="castle"></div>
+        <div class="mountain m1"></div>
+        <div class="mountain m2"></div>
+        <div class="field-glow"></div>
 
-        <div class="bar-block">
-          <div class="bar-label"><span>레벨</span><strong id="levelText">Lv. 1</strong></div>
-          <div class="progress"><span id="expBar"></span></div>
-          <div class="bar-label tiny"><span>EXP</span><strong id="expText">0 / 100</strong></div>
-        </div>
-
-        <div class="resource-row">
-          <div><span>골드</span><strong id="goldText">0</strong></div>
-          <div><span>전투력</span><strong id="powerText">10</strong></div>
-          <div><span>스테이지</span><strong id="mapText">1</strong></div>
-        </div>
-      </section>
-
-      <section class="panel battle-panel">
-        <div class="panel-title">
-          <h3>자동 사냥터</h3>
-          <span id="battleState">전투 중</span>
-        </div>
-        <div class="monster-box">
-          <div class="monster" id="monsterAvatar">슬라임</div>
-          <div class="monster-info">
-            <strong id="monsterName">들판 슬라임</strong>
-            <div class="progress danger"><span id="monsterHpBar"></span></div>
-            <p id="monsterHpText">HP 40 / 40</p>
+        <div class="battle-hud">
+          <div class="hero-panel">
+            <div class="portrait hero-portrait" id="heroPortrait">民</div>
+            <div>
+              <strong id="heroName">떠돌이 주민</strong>
+              <span id="heroRank">주민</span>
+            </div>
+          </div>
+          <div class="enemy-panel">
+            <div>
+              <strong id="monsterName">들판 슬라임</strong>
+              <span>STAGE <b id="stageText">1</b></span>
+            </div>
+            <div class="portrait monster-portrait" id="monsterPortrait"></div>
           </div>
         </div>
-        <div class="combat-log" id="combatLog"></div>
+
+        <div class="battle-field">
+          <div class="damage-pop" id="damagePop">-10</div>
+          <div class="character hero" id="heroSprite">
+            <div class="head"></div>
+            <div class="body"></div>
+            <div class="cape"></div>
+            <div class="weapon"></div>
+            <div class="shadow"></div>
+          </div>
+          <div class="slash" id="slashEffect"></div>
+          <div class="monster" id="monsterSprite">
+            <div class="monster-eye left"></div>
+            <div class="monster-eye right"></div>
+            <div class="monster-mouth"></div>
+            <div class="monster-shadow"></div>
+          </div>
+        </div>
+
+        <div class="enemy-hp-box">
+          <div class="enemy-hp-label"><span id="monsterHpText">HP 40 / 40</span><span id="battleState">자동 전투 중</span></div>
+          <div class="hp-track"><div class="hp-fill" id="monsterHpBar"></div></div>
+        </div>
       </section>
 
-      <section class="panel action-panel">
-        <h3>성장 메뉴</h3>
-        <button id="evolveBtn" class="primary-btn">승급하기</button>
-        <button id="enhanceBtn" class="action-btn">무기 강화</button>
-        <button id="bossBtn" class="action-btn">보스 도전</button>
-        <button id="claimBtn" class="action-btn">접속 보상 받기</button>
-        <button id="resetBtn" class="danger-btn">초기화</button>
+      <section class="stats-grid">
+        <div class="stat-card"><span>레벨</span><strong id="levelText">1</strong></div>
+        <div class="stat-card"><span>골드</span><strong id="goldText">0</strong></div>
+        <div class="stat-card"><span>전투력</span><strong id="powerText">10</strong></div>
+        <div class="stat-card"><span>무기</span><strong id="weaponText">+0</strong></div>
       </section>
 
-      <section class="panel info-panel">
-        <h3>캐릭터 정보</h3>
-        <ul class="stat-list">
-          <li><span>진화 단계</span><strong id="evolutionText">1 / 6</strong></li>
-          <li><span>무기 강화</span><strong id="weaponText">+0</strong></li>
-          <li><span>초당 피해량</span><strong id="dpsText">10</strong></li>
-          <li><span>승급 조건</span><strong id="evolveNeedText">Lv. 5 / 300G</strong></li>
-        </ul>
+      <section class="progress-card">
+        <div class="progress-title"><span>성장 경험치</span><b id="expText">0 / 100</b></div>
+        <div class="exp-track"><div class="exp-fill" id="expBar"></div></div>
+        <div class="evolution-line" id="evolutionLine"></div>
+      </section>
+
+      <section class="action-grid">
+        <button id="rankUpBtn" class="action-btn primary">승급하기</button>
+        <button id="upgradeBtn" class="action-btn">무기 강화</button>
+        <button id="bossBtn" class="action-btn danger">보스 도전</button>
+        <button id="rewardBtn" class="action-btn reward">접속 보상</button>
       </section>
     </main>
 
     <nav class="bottom-nav">
-      <button data-tab="hero" class="active">캐릭터</button>
-      <button data-tab="battle">사냥</button>
-      <button data-tab="growth">성장</button>
-      <button data-tab="info">정보</button>
+      <button class="nav-item active">캐릭터</button>
+      <button class="nav-item">사냥</button>
+      <button class="nav-item">성장</button>
+      <button class="nav-item">상점</button>
     </nav>
   </div>
 
-  <div id="toast" class="toast"></div>
-  <script src="script.js"></script>
+  <div class="toast" id="toast">저장되었습니다</div>
+  <script src="./script.js"></script>
 </body>
 </html>
