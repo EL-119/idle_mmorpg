@@ -1028,3 +1028,46 @@ body > .create-close-fixed,
 .player.player-tier-2{filter:drop-shadow(0 0 13px #f6d365) drop-shadow(0 10px 8px rgba(0,0,0,.55))!important}
 .player.player-tier-3{filter:drop-shadow(0 0 16px #ff6b4a) drop-shadow(0 10px 8px rgba(0,0,0,.55))!important}
 .player.player-tier-4,.player.player-tier-5,.player.player-tier-6{filter:drop-shadow(0 0 22px #b06cff) drop-shadow(0 10px 8px rgba(0,0,0,.55))!important}
+
+
+/* v51 true restore: remove all image-skin behavior and force original green CSS character */
+#playerSprite.player,
+.stage #playerSprite.player,
+div#playerSprite.player{
+  position:absolute !important;
+  left:23% !important;
+  bottom:82px !important;
+  width:94px !important;
+  height:120px !important;
+  background:linear-gradient(160deg,#8dff85,#2aa64a) !important;
+  background-image:none !important;
+  border-radius:48% 48% 34% 34% !important;
+  overflow:visible !important;
+  filter:drop-shadow(0 18px 12px rgba(0,0,0,.35)) !important;
+  animation:walk 1.2s infinite ease-in-out !important;
+  transform:none;
+  z-index:3 !important;
+}
+#playerSprite.player:before{
+  content:"" !important;
+  display:block !important;
+  position:absolute !important;
+  left:18px !important;
+  right:18px !important;
+  bottom:-22px !important;
+  height:40px !important;
+  background:#236c37 !important;
+  border-radius:20px !important;
+}
+#playerSprite.player img,
+#playerSprite.player:after{
+  display:none !important;
+  content:none !important;
+}
+#playerSprite.player .horn{display:block !important;position:absolute !important;top:-20px !important;width:24px !important;height:36px !important;background:#d4c1a0 !important;border-radius:80% 10% !important}
+#playerSprite.player .horn.left{left:14px !important;transform:rotate(-25deg) !important}
+#playerSprite.player .horn.right{right:14px !important;transform:rotate(25deg) !important}
+#playerSprite.player .eye{display:block !important;position:absolute !important;top:42px !important;width:14px !important;height:14px !important;background:#120a1a !important;border-radius:50% !important}
+#playerSprite.player .eye.left{left:26px !important}
+#playerSprite.player .eye.right{right:26px !important}
+#playerSprite.player .mouth{display:block !important;position:absolute !important;left:33px !important;top:74px !important;width:28px !important;height:10px !important;border-bottom:4px solid #182014 !important;border-radius:50% !important}
