@@ -393,7 +393,7 @@ function renderMissions(){
 
 let currentRankMode='level';
 function buildRankingRows(mode='level'){
-  const names=['그림자왕','무지개용사','심연검사','랜덤황제','초월토끼','붉은마도사','빙결기사','혼돈사도','안개추적자','전설수집가','오라군주','폭풍슬라임','균열방랑자','별빛오크','마왕후보','천공사냥꾼','운명의씨앗','폐허도적','분화구정령','신벌기사','검은늑대','푸른고블린','황금임프','독버섯장로','서리거인','공허눈동자','용암골렘','타락천사','혼돈룡','균열군주','불멸의초보'];
+  const names=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자','균열탐험가','전설수집러','스킬장인','폭풍헌터','무지개유저','자동사냥꾼','불멸초보','희귀수집가','에픽헌터','신화도전자','공속장인','치명타왕','관통마스터','경험치러너','구역개척자','랭킹추격자','초고속성장','운명의계정','패시브중독','최종진화자','오늘의강자'];
   const rows=[];
   const baseLevel = state ? Math.max(1,state.level) : 1;
   for(let i=0;i<30;i++){
@@ -485,6 +485,8 @@ $('skillDexBtn').onclick=()=>{ $('skillDexModal').classList.add('active'); rende
 $('skillDexClose').onclick=()=>$('skillDexModal').classList.remove('active');
 $('statusDetailBtn').onclick=openStatusDetail;
 $('statusDetailClose').onclick=()=>$('statusDetailModal').classList.remove('active');
+if($('noticeBtn')) $('noticeBtn').onclick=()=>$('noticeModal').classList.add('active');
+if($('noticeClose')) $('noticeClose').onclick=()=>$('noticeModal').classList.remove('active');
 $('rankingBtn').onclick=openRanking;
 $('rankingPanelBtn').onclick=openRanking;
 $('missionBtn').onclick=()=>{ renderMissions(); $('missionModal').classList.add('active'); };
