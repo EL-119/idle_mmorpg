@@ -578,3 +578,19 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
   .player:after{left:12px!important;top:13px!important;width:36px!important;height:46px!important}
   .aura:before{inset:10px!important}.aura:after{inset:24px!important}
 }
+/* v22 zone system */
+.stage{transition:background .55s ease, box-shadow .55s ease}
+.stage.zone-0{background:radial-gradient(circle at 50% 75%,#5fa86a 0,#2f6847 38%,#14251d 100%)}
+.stage.zone-1{background:radial-gradient(circle at 35% 35%,rgba(181,255,216,.25),transparent 28%),linear-gradient(160deg,#203d35,#182a31 55%,#0d111b)}
+.stage.zone-2{background:radial-gradient(circle at 55% 78%,#a7442f 0,#5f2525 42%,#160d13 100%)}
+.stage.zone-3{background:radial-gradient(circle at 50% 30%,rgba(180,180,210,.2),transparent 30%),linear-gradient(160deg,#43364f,#201a2f 55%,#0d0b14)}
+.stage.zone-4{background:radial-gradient(circle at 48% 80%,#225646 0,#12372f 45%,#080f13 100%)}
+.stage.zone-5{background:radial-gradient(circle at 50% 82%,#ff6b2f 0,#6d1e15 42%,#13070a 100%)}
+.stage.zone-6{background:radial-gradient(circle at 48% 70%,#bce7ff 0,#355d7b 40%,#0a1320 100%)}
+.stage.zone-7{background:radial-gradient(circle at 50% 35%,rgba(118,96,255,.42),transparent 28%),linear-gradient(160deg,#33216b,#17112c 56%,#080713)}
+.stage.zone-8{background:radial-gradient(circle at 52% 80%,#c22727 0,#431010 38%,#080305 100%)}
+.stage.zone-9{background:conic-gradient(from 180deg at 50% 55%,#1d0b37,#1e40af,#7e22ce,#be123c,#1d0b37)}
+.stage.zone-0:after,.stage.zone-1:after,.stage.zone-2:after,.stage.zone-3:after,.stage.zone-4:after,.stage.zone-5:after,.stage.zone-6:after,.stage.zone-7:after,.stage.zone-8:after,.stage.zone-9:after{content:"";position:absolute;left:0;right:0;bottom:0;height:32%;pointer-events:none;opacity:.75;background:linear-gradient(transparent,rgba(0,0,0,.45))}
+.zone-monster-8{filter:drop-shadow(0 0 46px rgba(239,68,68,.75)) drop-shadow(0 18px 14px rgba(0,0,0,.45))!important;transform:scale(1.12)}
+.zone-monster-9{filter:drop-shadow(0 0 58px rgba(255,255,255,.75)) drop-shadow(0 0 36px rgba(168,85,247,.65))!important;transform:scale(1.18)}
+@media(max-width:820px){.world-info{right:8px!important}.monster-card{top:44px!important}.world-info span:first-child{max-width:calc(100vw - 28px)!important}.world-info span:last-child{margin-left:auto}}
