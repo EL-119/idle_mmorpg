@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v28';
+const SAVE_KEY='random_growth_game_v29';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -36,15 +36,20 @@ function nextZone(){
 function rand(max){ return Math.floor(Math.random()*max); }
 function nowSec(){ return Math.floor(Date.now()/1000); }
 function clearFakeRankingCaches(){
-  const fakeNames=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자'];
+  // 랭킹은 실제 현재 캐릭터만 표시한다. 과거 버전의 더미/가짜 랭킹 캐시는 전부 삭제한다.
+  const fakeNames=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자','불멸자','패시브황','초월러너','마왕도전자'];
   try{
     for(let i=localStorage.length-1;i>=0;i--){
       const k=localStorage.key(i);
       const v=localStorage.getItem(k)||'';
-      if(/rank|ranking|leader/i.test(k) || fakeNames.some(n=>v.includes(n))){ localStorage.removeItem(k); }
+      const isOldSave=/^random_growth_game_v(1[0-9]|2[0-8]|[1-9])$/.test(k);
+      const isRankCache=/rank|ranking|leader|score|dummy|fake/i.test(k);
+      const hasFakeName=fakeNames.some(n=>v.includes(n));
+      if(isOldSave || isRankCache || hasFakeName) localStorage.removeItem(k);
     }
   }catch(e){}
 }
+
 function log(msg){ const el=$('log'); el.innerHTML = `<div>${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} · ${msg}</div>` + el.innerHTML; }
 
 function weightedGrade(){
@@ -404,15 +409,20 @@ function renderMissions(){
 let currentRankMode='level';
 function buildRankingRows(mode='level'){
   clearFakeRankingCaches();
-  const rows=[];
-  if(state && state.createdAt && state.name && state.passives && state.passives.length){
-    if(!state.id) state.id='player_'+(state.createdAt||Date.now());
-    const z=currentZone();
-    rows.push({name:state.name, level:Math.max(1,state.level||1), zone:z.name, zoneIndex:z.index, me:true});
-  }
-  if(mode==='zone') rows.sort((a,b)=>(b.zoneIndex-a.zoneIndex)||(b.level-a.level));
-  else rows.sort((a,b)=>b.level-a.level);
-  return rows.slice(0,30).map((r,i)=>({...r, rank:i+1}));
+  // 서버 연동 전 랭킹은 절대 임의 유저를 만들지 않는다.
+  // 현재 브라우저에서 실제 생성되어 저장된 내 캐릭터 1명만 표시한다.
+  if(!state || !state.createdAt || !state.name){ return []; }
+  if(!state.passives || !state.passives.length){ return []; }
+  const z=currentZone();
+  const row={
+    rank:1,
+    name:state.name,
+    level:Math.max(1,state.level||1),
+    zone:z.name,
+    zoneIndex:z.index,
+    me:true
+  };
+  return [row];
 }
 function renderRanking(mode=currentRankMode){
   currentRankMode=mode;
@@ -487,7 +497,15 @@ if(statusBtn){ statusBtn.onclick=openStatusDetail; }
 
 $('createBtn').onclick=createCharacter;
 if($('createClose')) $('createClose').onclick=()=>$('createModal').classList.remove('active');
-$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v28','random_growth_game_v27','random_growth_game_v26','random_growth_game_v25','random_growth_game_v24','random_growth_game_v23','random_growth_game_v22','random_growth_game_v21','random_growth_game_v20','random_growth_game_v19','random_growth_game_v18','random_growth_game_v17','random_growth_game_v16','random_growth_game_v15','random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
+if($('createCloseBottom')) $('createCloseBottom').onclick=()=>$('createModal').classList.remove('active');
+
+function closeModalById(id){ const m=$(id); if(m) m.classList.remove('active'); }
+document.addEventListener('click', (e)=>{
+  const btn=e.target.closest('[data-close-modal]');
+  if(btn){ closeModalById(btn.dataset.closeModal); }
+});
+
+$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v29','random_growth_game_v28','random_growth_game_v27','random_growth_game_v26','random_growth_game_v25','random_growth_game_v24','random_growth_game_v23','random_growth_game_v22','random_growth_game_v21','random_growth_game_v20','random_growth_game_v19','random_growth_game_v18','random_growth_game_v17','random_growth_game_v16','random_growth_game_v15','random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
 $('passiveBtn').onclick=()=>{$('passiveModal').classList.add('active'); renderPassives();};
@@ -514,5 +532,6 @@ $('exportBtn').onclick=()=>{ dataMode='export'; $('dataTitle').textContent='저�
 $('importBtn').onclick=()=>{ dataMode='import'; $('dataTitle').textContent='저장 데이터 가져오기'; $('dataBox').value=''; $('dataApply').style.display='inline-block'; $('dataModal').classList.add('active'); };
 $('dataClose').onclick=()=>$('dataModal').classList.remove('active');
 $('dataApply').onclick=()=>{ try{ state=JSON.parse(decodeURIComponent(escape(atob($('dataBox').value.trim())))); state=migrate(state); save(); $('dataModal').classList.remove('active'); render(); startLoop(); log('가져오기 완료.'); }catch(e){ alert('저장 데이터 형식이 올바르지 않습니다.'); } };
+clearFakeRankingCaches();
 clearFakeRankingCaches();
 if(!load()) $('createModal').classList.add('active');
