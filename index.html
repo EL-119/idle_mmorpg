@@ -17,7 +17,7 @@
         <h1>랜덤키우기</h1>
         <p>랜덤 패시브를 중첩해서 끝없이 강해지는 자동 성장 RPG</p>
       </div>
-      <button id="saveBtn" class="ghost">저장</button>
+      <div class="top-actions"><button id="statusBtn" class="mobile-status-btn">상태창</button><button id="saveBtn" class="ghost">저장</button></div>
     </header>
 
     <main class="game-screen">
@@ -43,7 +43,7 @@
         </div>
       </section>
 
-      <section class="panel info-panel">
+      <section class="panel info-panel status-panel" id="statusPanel">
         <div class="char-head">
           <div><h2 id="charName">무명의 씨앗</h2><p id="charTitle">Lv. 1 · 새싹 존재</p></div>
           <button id="newCharBtn" class="danger small">새 캐릭터</button>
