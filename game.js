@@ -107,7 +107,7 @@ function calcStats(){
   stats.attackSpeed=+(1000/stats.attackMs).toFixed(2);
   return stats;
 }
-function needExp(){ return Math.max(1, Math.round(base.expNeed*Math.pow(1.18,state.level-1)/4)); }
+function needExp(){ return Math.max(1, Math.round(base.expNeed*Math.pow(1.18,state.level-1)*0.7/4)); }
 
 function hunt(){
   if(!state || !state.auto || pendingChoices.length) return;

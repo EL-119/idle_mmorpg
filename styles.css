@@ -441,3 +441,47 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
   .monster-card b{font-size:11px!important;}
   .monster-card span{font-size:10px!important;}
 }
+
+
+/* v20: mobile modal close button visibility + 30% lower EXP requirement */
+@media (max-width: 820px){
+  .modal{
+    z-index:9999!important;
+  }
+  .modal.active{
+    position:fixed!important;
+    inset:0!important;
+    display:block!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    padding:calc(24px + env(safe-area-inset-top)) 10px calc(42px + env(safe-area-inset-bottom))!important;
+    background:rgba(0,0,0,.82)!important;
+  }
+  .modal-box{
+    margin:0 auto 32px!important;
+    max-height:none!important;
+    overflow:visible!important;
+    padding-top:0!important;
+  }
+  .modal-title{
+    position:sticky!important;
+    top:calc(8px + env(safe-area-inset-top))!important;
+    z-index:10000!important;
+    margin:0 -14px 12px!important;
+    padding:12px 14px!important;
+    background:rgba(29,22,47,.98)!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+    border-left:0!important;
+    border-right:0!important;
+    box-shadow:0 10px 22px rgba(0,0,0,.35)!important;
+  }
+  .modal-title button{
+    position:relative!important;
+    z-index:10001!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-height:38px!important;
+  }
+}
