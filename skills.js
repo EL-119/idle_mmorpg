@@ -17,19 +17,32 @@ const PREFIX = {
   epic:['운명을 비트는','세계수의','별을 삼킨','시간을 접는','차원을 찢는'],
   god:['창조신의','종말신의']
 };
-const SUFFIX = ['피부','손놀림','심장','눈동자','야성','투지','재생력','행운','분노','집중','마력회로','생존본능','흡수력','전투감각','약점간파'];
-const TYPES = ['power','crit','speed','autoStrike','expPulse','pierce','combo'];
+const SUFFIX_BY_TYPE = {
+  power:['완력','검격','힘줄','분노','투지','타격감각','파괴본능','근력회로'],
+  crit:['약점간파','눈동자','급소감각','예리함','집중','사냥감각','명중본능'],
+  critDamage:['처형술','급소폭발','치명일격','마무리감각','분쇄본능','일점파괴'],
+  speed:['손놀림','발놀림','반사신경','광속본능','질주회로','전투리듬'],
+  autoStrike:['마력탄','그림자검','번개구슬','불꽃낙인','서리파편','암흑침'],
+  expPulse:['흡수력','성장심장','학습본능','경험회로','진화감각','기록흡수'],
+  pierce:['관통력','방어분쇄','갑옷파괴','약점절개','장갑분석','파쇄본능'],
+  combo:['연격술','광분연타','전투흐름','연속본능','폭주리듬','누적타격'],
+  flatExp:['수련일지','성장의 씨앗','전투기록','경험저장소','각성노트'],
+  execute:['처형본능','마무리손길','끝장감각','절명표식','사냥종결자'],
+  overdrive:['과부하','전투가열','분노축적','열혈회로','광전사본능']
+};
+const TYPES = ['power','crit','critDamage','speed','autoStrike','expPulse','pierce','combo','flatExp','execute','overdrive'];
 
 function makeSkillPool(){
   const pool=[];
   GRADES.forEach(g=>{
     for(let i=1;i<=g.count;i++){
       const p=PREFIX[g.key][(i-1)%PREFIX[g.key].length];
-      const s=SUFFIX[(i-1)%SUFFIX.length];
       const scale={normal:1,magic:1.6,rare:2.4,unique:3.6,legend:5.5,epic:8,god:13}[g.key];
       const statType=TYPES[(i-1)%TYPES.length];
-      const value=Math.max(1,Math.round((2+(i%9))*scale));
-      const interval=Math.max(2, Math.round(9 - Math.min(6, scale/1.6)));
+      const suffixes=SUFFIX_BY_TYPE[statType] || ['전투감각'];
+      const s=suffixes[Math.floor((i-1)/TYPES.length)%suffixes.length];
+      const value=Math.max(1,Math.round((2+(i%17))*scale + Math.floor(i/TYPES.length)));
+      const interval=Math.max(2, Math.round(10 - Math.min(7, scale/1.5) + ((i%3)-1)));
       pool.push({
         id:`${g.key}_${i}`,
         name:`${p} ${s}`,
@@ -50,11 +63,15 @@ function describeSkill(type,value,grade,interval){
   const map={
     power:`공격력이 ${value} 증가합니다. 중첩될수록 그대로 합산됩니다.`,
     crit:`치명타 확률이 ${Math.max(1,Math.floor(value/2))}% 증가합니다.`,
+    critDamage:`치명타 데미지가 ${Math.max(2,Math.floor(value*1.4))}% 증가합니다.`,
     speed:`공격속도가 빨라집니다. 중첩될수록 공격 간격이 더 짧아집니다.`,
     autoStrike:`${interval}초마다 몬스터에게 공격력 기반 추가 피해를 줍니다.`,
     expPulse:`${interval}초마다 추가 경험치를 획득합니다.`,
     pierce:`몬스터 방어력을 ${value}% 무시합니다.`,
-    combo:`일반 공격 피해량이 ${value}% 증가합니다.`
+    combo:`일반 공격 피해량이 ${value}% 증가합니다.`,
+    flatExp:`공격할 때마다 추가 경험치를 ${value} 획득합니다.`,
+    execute:`남은 HP가 낮은 몬스터에게 추가 피해가 ${value}% 증가합니다.`,
+    overdrive:`공격할수록 전투 가열 보정이 누적되어 피해량이 ${Math.max(1,Math.floor(value/2))}% 증가합니다.`
   };
   return `${grade} 등급 패시브. ${map[type]}`;
 }
