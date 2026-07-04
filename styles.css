@@ -1014,3 +1014,17 @@ body > .create-close-fixed,
 .player-tier-4{filter:drop-shadow(0 0 22px #fde047) drop-shadow(0 14px 12px rgba(0,0,0,.5))!important}
 .player-tier-5{filter:drop-shadow(0 0 26px #fb7185) drop-shadow(0 14px 12px rgba(0,0,0,.5))!important}
 .player-tier-6{filter:drop-shadow(0 0 32px #fff) drop-shadow(0 14px 12px rgba(0,0,0,.5))!important}
+
+/* v39 embedded illustrated player skin */
+.player{
+  width:118px!important;height:142px!important;
+  background-image:url("player_knight.png")!important;
+  background-size:contain!important;background-position:center bottom!important;
+  background-repeat:no-repeat!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;overflow:visible!important;
+}
+.player:before,.player:after,.player .eye,.player .mouth,.player .horn{display:none!important}
+.player.player-tier-1{filter:drop-shadow(0 0 10px #68d391) drop-shadow(0 10px 8px rgba(0,0,0,.55))!important}
+.player.player-tier-2{filter:drop-shadow(0 0 13px #f6d365) drop-shadow(0 10px 8px rgba(0,0,0,.55))!important}
+.player.player-tier-3{filter:drop-shadow(0 0 16px #ff6b4a) drop-shadow(0 10px 8px rgba(0,0,0,.55))!important}
+.player.player-tier-4,.player.player-tier-5,.player.player-tier-6{filter:drop-shadow(0 0 22px #b06cff) drop-shadow(0 10px 8px rgba(0,0,0,.55))!important}
