@@ -756,3 +756,10 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
   .modal-title{position:sticky!important; top:0!important; background:#1d162f!important; padding:6px 0 10px!important; z-index:100!important;}
   .modal-title .modal-x{position:relative!important; right:auto!important; top:auto!important; flex:0 0 auto!important;}
 }
+
+/* v30 hard fixes */
+.create-modal-box{position:relative;padding-top:22px!important;}
+.create-title{padding-right:72px;}
+.modal-x{display:inline-flex!important;align-items:center;justify-content:center;min-width:56px;height:36px;background:linear-gradient(135deg,#7c3aed,#db2777)!important;color:#fff!important;position:absolute;top:14px;right:14px;z-index:100002!important;opacity:1!important;visibility:visible!important;}
+.create-close-fixed{position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 14px)!important;right:14px!important;z-index:100001!important;background:linear-gradient(135deg,#7c3aed,#db2777)!important;color:#fff!important;border:1px solid rgba(255,255,255,.32)!important;box-shadow:0 10px 30px rgba(0,0,0,.55)!important;padding:10px 14px!important;border-radius:14px!important;font-weight:900!important;display:block!important;opacity:1!important;visibility:visible!important;}
+.empty-rank{padding:18px;border-radius:16px;background:#120e1d;color:#d6c7ef;line-height:1.55;text-align:center;}
