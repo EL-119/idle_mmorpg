@@ -1097,3 +1097,21 @@ body > .create-close-fixed,
 
 /* v47 user-provided fire swordsman skin */
 .player{width:240px!important;height:270px!important;left:calc(23% - 67px)!important;bottom:18px!important;background-image:url("player_fire_skin_animated.png")!important;background-size:960px 270px!important;background-repeat:no-repeat!important;background-position:0 0!important;background-color:transparent!important;border-radius:0!important;transform-origin:50% 100%!important;filter:drop-shadow(0 16px 10px rgba(0,0,0,.5))!important;animation:fireSkinFrames .52s steps(4) infinite,fireSkinFloat 1.05s ease-in-out infinite!important}.player:before,.player:after,.player .horn,.player .eye,.player .mouth{display:none!important;content:none!important}@keyframes fireSkinFrames{from{background-position:0 0}to{background-position:-960px 0}}@keyframes fireSkinFloat{0%,100%{transform:translateY(0) rotate(-1deg) scale(1)}50%{transform:translateY(-7px) rotate(1deg) scale(1.025)}}.player.is-attacking,.player.attack,.battle-scene.attacking .player{animation:fireSkinFrames .26s steps(4) infinite,fireSkinAttack .32s ease-in-out infinite!important}@keyframes fireSkinAttack{0%,100%{transform:translate(0,0) rotate(-2deg) scale(1)}45%{transform:translate(20px,-8px) rotate(6deg) scale(1.06)}}
+/* v48 DOM skin replacement: player is now an actual image element */
+#playerSprite.player-fire-skin{
+ position:absolute!important; left:calc(23% - 58px)!important; bottom:20px!important;
+ width:210px!important; height:260px!important; overflow:visible!important;
+ background:none!important; border-radius:0!important;
+ filter:drop-shadow(0 15px 10px rgba(0,0,0,.52))!important;
+ animation:fireHeroBob 1s ease-in-out infinite!important;
+}
+#playerSprite.player-fire-skin::before,#playerSprite.player-fire-skin::after{display:none!important;content:none!important}
+#playerSprite.player-fire-skin img{
+ display:block!important; position:absolute!important; inset:0!important;
+ width:840px!important; height:260px!important; max-width:none!important;
+ object-fit:fill!important; background:none!important;
+ animation:fireHeroFrames .56s steps(4) infinite!important;
+ transform-origin:50% 100%!important;
+}
+@keyframes fireHeroFrames{from{transform:translateX(0)}to{transform:translateX(-840px)}}
+@keyframes fireHeroBob{0%,100%{margin-bottom:0;transform:rotate(-1deg)}50%{margin-bottom:8px;transform:rotate(1deg)}}
