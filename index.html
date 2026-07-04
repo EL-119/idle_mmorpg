@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#141122" />
+  <title>랜덤키우기</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css?v=34" />
+</head>
+<body>
+  <div id="app">
+    <aside class="side-ad side-ad-left" aria-label="좌측 광고 영역"><span>광고 영역</span><small>좌측 슬롯</small></aside>
+    <aside class="side-ad side-ad-right" aria-label="우측 광고 영역"><span>광고 영역</span><small>우측 슬롯</small></aside>
+    <header class="topbar">
+      <div>
+        <h1>랜덤키우기</h1>
+        <p>랜덤 패시브를 중첩해서 끝없이 강해지는 자동 성장 RPG</p>
+      </div>
+      <div class="top-actions"><button id="statusBtn" class="mobile-status-btn">스테이터스</button><button id="noticeBtn" class="ghost">공지</button><button id="rankingBtn" class="ghost">랭킹</button><button id="missionBtn" class="ghost">임무</button><button id="saveBtn" class="ghost">저장</button></div>
+    </header>
+
+    <main class="game-screen">
+      <section class="panel stage-panel">
+        <div class="stage" id="stage">
+          <div class="world-info">
+            <span id="zoneText">초원 1구역</span>
+          </div>
+          <div class="aura" id="aura"></div>
+          <div id="effectLayer" class="effect-layer"></div>
+          <div class="player" id="playerSprite">
+            <div class="horn left"></div><div class="horn right"></div>
+            <div class="eye left"></div><div class="eye right"></div><div class="mouth"></div>
+          </div>
+          <div class="enemy" id="enemySprite"><div class="enemy-eye left"></div><div class="enemy-eye right"></div></div>
+          <div class="monster-card">
+            <b id="monsterName">슬라임</b>
+            <span id="monsterHpText">HP 40 / 40</span>
+            <div class="bar monster"><i id="monsterHpBar"></i></div>
+          </div>
+          <div id="floatingText"></div>
+        </div>
+      </section>
+
+      <section class="panel info-panel status-panel" id="statusPanel">
+        <div class="char-head">
+          <div><h2 id="charName">무명의 씨앗</h2><p id="charTitle">Lv. 1 · 새싹 존재</p></div>
+          <button id="newCharBtn" class="danger small">새 캐릭터</button>
+        </div>
+        <div class="bars compact">
+          <label>EXP <span id="expText">0 / 100</span></label><div class="bar exp"><i id="expBar"></i></div>
+        </div>
+        <div class="stats-grid">
+          <div><span>레벨</span><b id="level">1</b></div>
+          <div><span>공격력</span><b id="attackPower">10</b></div>
+          <div><span>공격속도</span><b id="attackSpeed">1.0/s</b></div>
+          <div><span>처치</span><b id="kills">0</b></div>
+          <div><span>패시브</span><b id="passiveCount">1</b></div>
+          <div><span>총 Lv</span><b id="stackCount">1</b></div>
+        </div>
+        <div class="btn-grid">
+          <button id="huntBtn" class="primary">자동 사냥 중</button>
+          <button id="passiveBtn">패시브 창</button>
+          <button id="skillDexBtn">스킬도감</button>
+          <button id="statusDetailBtn">스테이터스</button>
+          <button id="rankingPanelBtn" class="ghost">랭킹</button>
+          <button id="missionPanelBtn" class="ghost">임무</button>
+          <button id="exportBtn" class="ghost">내보내기</button>
+          <button id="importBtn" class="ghost">가져오기</button>
+          <button id="supportBtn" class="support-btn">광고/후원</button>
+        </div>
+      </section>
+
+      <section class="panel quick-panel log-panel">
+        <h3>기록</h3>
+        <div id="log" class="log"></div>
+      </section>
+    </main>
+
+    <aside class="ad-slot" aria-label="광고 영역">
+      <span>광고 영역</span>
+      <small>배너 광고를 연결할 수 있는 하단 슬롯</small>
+    </aside>
+  </div>
+
+  <div id="createModal" class="modal active">
+    <div class="modal-box create-modal-box">
+      <div class="modal-title create-title"><h2>랜덤 캐릭터 생성</h2></div>
+      <p>닉네임과 시작 패시브가 모두 랜덤으로 정해집니다. 같은 패시브를 다시 얻으면 해당 스킬 레벨이 1씩 상승합니다.</p>
+      <button id="createBtn" class="primary wide">랜덤 캐릭터 생성</button>
+      <button id="createCloseBottom" class="ghost wide" data-close-modal="createModal">창 닫기</button>
+    </div>
+  </div>
+
+  <div id="choiceModal" class="modal">
+    <div class="modal-box choice-box">
+      <h2>10레벨 보상</h2>
+      <p>아래 3개의 랜덤 패시브 중 1개를 선택하세요. 이미 보유한 스킬도 다시 나올 수 있고, 선택하면 Lv.+1 됩니다.</p>
+      <div id="choiceList" class="choice-list"></div>
+    </div>
+  </div>
+
+  <div id="passiveModal" class="modal">
+    <div class="modal-box passive-box">
+      <div class="modal-title"><h2>보유 패시브</h2><button id="passiveClose" class="ghost small">닫기</button></div>
+      <div id="passiveSummary" class="passive-summary"></div>
+      <div id="passiveList" class="passive-list"></div>
+    </div>
+  </div>
+
+  <div id="skillDexModal" class="modal">
+    <div class="modal-box passive-box skilldex-box">
+      <div class="modal-title"><h2>스킬도감</h2><button id="skillDexClose" class="ghost small">닫기</button></div>
+      <div id="skillDexTabs" class="dex-tabs"></div>
+      <div id="skillDexList" class="passive-list dex-list"></div>
+    </div>
+  </div>
+
+  <div id="statusDetailModal" class="modal">
+    <div class="modal-box status-detail-box">
+      <div class="modal-title"><h2>스테이터스 상세</h2><button id="statusDetailClose" class="ghost small">닫기</button></div>
+      <p>현재 전투 공식에 적용되는 공격력, 공격속도, 치명타, 관통, 추가 경험치 정보를 확인할 수 있습니다.</p>
+      <div id="statusDetailGrid" class="status-detail-grid"></div>
+    </div>
+  </div>
+
+  <div id="rankingModal" class="modal">
+    <div class="modal-box ranking-box">
+      <div class="modal-title"><h2>랭킹</h2><button id="rankingClose" class="ghost small">닫기</button></div>
+      <p>현재 랭킹은 실제로 생성해 플레이 중인 내 캐릭터만 표시됩니다. 서버 연동 전에는 가짜 유저를 절대 넣지 않습니다.</p>
+      <div class="ranking-tabs">
+        <button id="rankLevelTab" class="active">플레이어 레벨</button>
+        <button id="rankZoneTab">현재 구역</button>
+      </div>
+      <div id="rankingList" class="ranking-list"></div>
+    </div>
+  </div>
+
+
+  <div id="noticeModal" class="modal">
+    <div class="modal-box notice-box">
+      <div class="modal-title"><h2>공지사항</h2><button id="noticeClose" class="ghost small">닫기</button></div>
+      <div class="notice-list">
+        <div class="notice-item"><b>v34 업데이트</b><p>새 캐릭터 창은 하단 창 닫기 버튼 1개만 남기고, 열거나 닫아도 자동 사냥이 멈추지 않도록 다시 수정했습니다.</p></div>
+        <div class="notice-item"><b>랭킹 안내</b><p>가짜 랭킹을 제거하고 실제 플레이 중인 캐릭터만 표시되도록 변경했습니다.</p></div>
+        <div class="notice-item"><b>게임 방향</b><p>랜덤 패시브를 중첩해 운에 따라 성장 속도가 크게 달라지는 자동 성장 구조를 유지합니다.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="missionModal" class="modal">
+    <div class="modal-box notice-box mission-box">
+      <div class="modal-title"><h2>임무</h2><button id="missionClose" class="ghost small">닫기</button></div>
+      <p>외형, 오라, 자동공격 스킬 구성 조건을 확인할 수 있습니다.</p>
+      <div id="missionList" class="mission-list"></div>
+    </div>
+  </div>
+
+  <div id="supportModal" class="modal">
+    <div class="modal-box support-box">
+      <div class="modal-title"><h2>광고/후원 문의</h2><button id="supportClose" class="ghost small">닫기</button></div>
+      <p>광고 제휴, 후원, 문의는 아래 메인 메일 주소로 연락해 주세요.</p>
+      <div class="support-mail">
+        <span>메인 주소</span>
+        <b>vocl1123@gmail.com</b>
+      </div>
+    </div>
+  </div>
+
+  <div id="dataModal" class="modal">
+    <div class="modal-box">
+      <h2 id="dataTitle">저장 데이터</h2>
+      <textarea id="dataBox" rows="8"></textarea>
+      <div class="row"><button id="dataClose" class="ghost">닫기</button><button id="dataApply" class="primary">적용</button></div>
+    </div>
+  </div>
+
+  <script src="skills.js?v=34"></script>
+  <script src="game.js?v=34"></script>
+</body>
+</html>
