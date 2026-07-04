@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v14';
+const SAVE_KEY='random_growth_game_v17';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -235,7 +235,9 @@ function monsterFormTier(defense){
 function renderMonsterForm(){
   const e=$('enemySprite');
   if(!e || !state?.monster) return;
-  e.className='enemy monster-tier-' + monsterFormTier(state.monster.defense||0);
+  const tier=monsterFormTier(state.monster.defense||0);
+  e.className='enemy monster-tier-' + tier + ' monster-skin-' + tier;
+  e.setAttribute('data-monster', state.monster.name || '몬스터');
 }
 function displayClass(s){ return s.gradeClass; }
 function passiveTotalLv(list=passiveStacks()){ return list.reduce((a,s)=>a+(s.level||1),0); }
@@ -244,10 +246,49 @@ function auraOpacity(list=passiveStacks()){ return Math.min(.88, .16 + playerVis
 function updatePlayerVisual(list=passiveStacks()){ const p=$('playerSprite'); const a=$('aura'); if(!p||!a)return; const tier=playerVisualTier(list); p.className='player player-tier-' + tier; a.className='aura aura-tier-' + tier; }
 function spawnAttackEffect(type='normal', label=''){ const layer=$('effectLayer'); if(!layer)return; const el=document.createElement('div'); el.className='attack-effect ' + (type==='skill'?'skill-effect':'normal-effect'); el.textContent=type==='skill' ? (label||'스킬') : '일반공격'; layer.appendChild(el); setTimeout(()=>el.remove(),700); }
 function spawnPlayerEffect(type='heal', label=''){ const layer=$('effectLayer'); if(!layer)return; const el=document.createElement('div'); el.className='player-effect ' + type; el.textContent=label; layer.appendChild(el); setTimeout(()=>el.remove(),900); }
+function passiveStatSummary(stacks=passiveStacks()){
+  const sum={power:0, crit:0, critDamage:0, speed:0, pierce:0, combo:0, flatExp:0, execute:0, overdrive:0, autoStrike:0, expPulse:0};
+  stacks.forEach(s=>{
+    const lv=Math.max(1, s.level||1);
+    let t=s.statType;
+    if(t==='hp') t='power';
+    if(t==='regen') t='expPulse';
+    if(t==='power') sum.power += s.value*lv;
+    if(t==='crit') sum.crit += Math.max(1,Math.floor(s.value/2))*lv;
+    if(t==='critDamage') sum.critDamage += Math.max(2,Math.floor(s.value*1.4))*lv;
+    if(t==='speed') sum.speed += Math.max(8,Math.floor(s.value*2))*lv;
+    if(t==='pierce') sum.pierce += Math.max(1, Math.floor(s.value/2))*lv;
+    if(t==='combo') sum.combo += Math.max(1, Math.floor(s.value/2))*lv;
+    if(t==='flatExp') sum.flatExp += s.value*lv;
+    if(t==='execute') sum.execute += Math.max(1, Math.floor(s.value))*lv;
+    if(t==='overdrive') sum.overdrive += Math.max(1,Math.floor(s.value/2))*lv;
+    if(t==='autoStrike') sum.autoStrike += 1;
+    if(t==='expPulse') sum.expPulse += 1;
+  });
+  sum.crit=Math.min(85,sum.crit);
+  sum.pierce=Math.min(95,sum.pierce);
+  sum.execute=Math.min(500,sum.execute);
+  sum.overdrive=Math.min(300,sum.overdrive);
+  return sum;
+}
 function renderPassives(){
   const stacks=passiveStacks();
   const totalLv=stacks.reduce((a,s)=>a+(s.level||1),0);
-  $('passiveSummary').innerHTML=`고유 패시브 ${stacks.length}종 · 총 패시브 레벨 ${totalLv} · 같은 스킬 선택 시 레벨 상승`; 
+  const ps=passiveStatSummary(stacks);
+  $('passiveSummary').innerHTML=`
+    <div class="passive-summary-head">고유 패시브 ${stacks.length}종 · 총 패시브 레벨 ${totalLv} · 같은 스킬 선택 시 레벨 상승</div>
+    <div class="passive-stat-total">
+      <div><span>패시브 공격력</span><b>+${Math.round(ps.power)}</b></div>
+      <div><span>공격간격 감소</span><b>${Math.round(ps.speed)}ms</b></div>
+      <div><span>치명타 확률</span><b>+${ps.crit}%</b></div>
+      <div><span>치명타 데미지</span><b>+${ps.critDamage}%</b></div>
+      <div><span>방어 관통</span><b>+${ps.pierce}%</b></div>
+      <div><span>일반공격 보정</span><b>+${ps.combo}%</b></div>
+      <div><span>추가 EXP</span><b>+${Math.round(ps.flatExp)}</b></div>
+      <div><span>처형 피해</span><b>+${ps.execute}%</b></div>
+      <div><span>가열 피해</span><b>+${ps.overdrive}%</b></div>
+      <div><span>발동형 스킬</span><b>${ps.autoStrike + ps.expPulse}개</b></div>
+    </div>`; 
   $('passiveList').innerHTML=stacks.map(s=>`<div class="passive"><b><span class="${displayClass(s)}">${s.name}</span><em class="grade ${displayClass(s)}">${s.gradeName} Lv.${s.level}</em></b><p>${s.desc}</p></div>`).join('');
 }
 
@@ -369,7 +410,7 @@ const statusBtn=$('statusBtn');
 if(statusBtn){ statusBtn.onclick=openStatusDetail; }
 
 $('createBtn').onclick=createCharacter;
-$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
+$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v17','random_growth_game_v16','random_growth_game_v15','random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
 $('passiveBtn').onclick=()=>{$('passiveModal').classList.add('active'); renderPassives();};
