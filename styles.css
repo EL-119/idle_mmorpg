@@ -997,3 +997,20 @@ body > .create-close-fixed,
   .player{width:62px!important;height:96px!important;left:15%!important;bottom:44px!important}
   .player:after{left:18px!important;top:0!important;width:28px!important;height:31px!important}.player:before{left:12px!important;top:29px!important;width:40px!important;height:52px!important}.horn.left{left:13px!important;top:15px!important;width:36px!important;height:20px!important}.horn.right{right:-4px!important;top:43px!important;width:32px!important;height:64px!important}.eye{top:14px!important}.eye.left{left:27px!important}.eye.right{right:27px!important}.mouth{left:28px!important;top:22px!important}.player .mouth:after{left:-18px!important;top:32px!important;width:25px!important;height:56px!important}.player .mouth:before{left:-18px!important;top:78px!important;width:53px!important;height:14px!important}
 }
+
+/* v38: hand-built human knight sprite */
+.player{width:96px!important;height:150px!important;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;filter:drop-shadow(0 14px 12px rgba(0,0,0,.5))!important;overflow:visible}
+.player:before{content:"";position:absolute;left:23px!important;top:4px!important;bottom:auto!important;right:auto!important;width:50px!important;height:50px!important;background:radial-gradient(circle at 36% 32%,#ffe5c8 0 8%,#d59a70 9% 56%,#713d2e 57% 100%)!important;border:3px solid #261725!important;border-radius:48% 48% 44% 44%!important;box-shadow:inset -8px -5px 0 rgba(56,20,18,.35)}
+.player:after{content:"";position:absolute;left:12px!important;top:46px!important;width:73px!important;height:77px!important;background:linear-gradient(90deg,#20283f 0 16%,#596d93 17% 34%,#273553 35% 67%,#9eb8dc 68% 82%,#20283f 83%)!important;border:3px solid #111827!important;border-radius:24px 24px 12px 12px!important;clip-path:polygon(18% 0,82% 0,100% 27%,83% 100%,17% 100%,0 27%)!important;box-shadow:inset 0 10px 8px rgba(255,255,255,.25),inset 0 -12px 12px rgba(0,0,0,.35)}
+.player .horn{display:none!important}
+.player .eye{top:27px!important;width:7px!important;height:7px!important;background:#25131c!important;box-shadow:none!important;z-index:4}
+.player .eye.left{left:39px!important}.player .eye.right{right:39px!important}
+.player .mouth{left:43px!important;top:41px!important;width:12px!important;height:5px!important;border-bottom:2px solid #4a1e22!important;z-index:4}
+.player{background-image:linear-gradient(145deg,transparent 0 64%,#101827 65% 78%,transparent 79%)!important}
+.player-tier-2:after,.player-tier-3:after,.player-tier-4:after,.player-tier-5:after,.player-tier-6:after{animation:none!important}
+.player-tier-1{filter:drop-shadow(0 0 10px #5ee079) drop-shadow(0 14px 12px rgba(0,0,0,.5))!important}
+.player-tier-2{filter:drop-shadow(0 0 14px #38bdf8) drop-shadow(0 14px 12px rgba(0,0,0,.5))!important}
+.player-tier-3{filter:drop-shadow(0 0 18px #c084fc) drop-shadow(0 14px 12px rgba(0,0,0,.5))!important}
+.player-tier-4{filter:drop-shadow(0 0 22px #fde047) drop-shadow(0 14px 12px rgba(0,0,0,.5))!important}
+.player-tier-5{filter:drop-shadow(0 0 26px #fb7185) drop-shadow(0 14px 12px rgba(0,0,0,.5))!important}
+.player-tier-6{filter:drop-shadow(0 0 32px #fff) drop-shadow(0 14px 12px rgba(0,0,0,.5))!important}
