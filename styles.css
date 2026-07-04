@@ -20,3 +20,21 @@ html,body{min-height:100%;height:auto;overflow:auto;overscroll-behavior:none}.ga
 .eye{box-shadow:0 0 9px rgba(255,255,255,.9),inset 0 -3px 2px rgba(0,0,0,.45)}.horn{box-shadow:inset 5px 4px 7px rgba(255,255,255,.35),inset -5px -5px 7px rgba(0,0,0,.3)}
 .enemy{border:2px solid rgba(255,255,255,.18);box-shadow:inset 9px 9px 15px rgba(255,255,255,.18),inset -12px -12px 18px rgba(0,0,0,.32),0 16px 22px rgba(0,0,0,.35)}
 .enemy:after{display:block;content:"";left:18%;right:18%;top:10px;height:20px;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);opacity:.75}.enemy-eye{box-shadow:0 0 9px #fff, inset 0 -2px 2px rgba(0,0,0,.3)}
+
+/* v9 layout fixes: bottom ad slot and mobile scrolling */
+html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+#app{min-height:100dvh;display:flex;flex-direction:column}
+.game-screen{height:calc(100dvh - 64px - 74px);min-height:520px}
+.ad-slot{height:64px;margin:0 auto 10px;padding:10px 14px;width:calc(100% - 20px);max-width:1200px;border:1px dashed rgba(255,255,255,.22);border-radius:16px;background:linear-gradient(180deg,#181225,#110d1b);display:flex;align-items:center;justify-content:center;gap:10px;color:#cfc1e8;box-shadow:0 12px 32px rgba(0,0,0,.2)}
+.ad-slot span{font-weight:900;color:#fff}.ad-slot small{font-size:12px;color:#a996c9}
+@media(max-width:820px){
+  .topbar{position:relative;height:auto;min-height:58px}.topbar p{display:none}
+  .game-screen{height:auto;min-height:0;display:flex;flex-direction:column;gap:10px;padding:10px;overflow:visible}
+  .stage{height:38svh;min-height:260px}.stage-panel{min-height:0}.info-panel,.quick-panel{width:100%}
+  .ad-slot{height:72px;margin-bottom:14px;flex-direction:column;gap:2px;flex-shrink:0}
+}
+@media(max-width:480px){
+  .stage{height:34svh;min-height:235px}.stats-grid{grid-template-columns:repeat(2,1fr)}.btn-grid{grid-template-columns:1fr 1fr}
+  .monster-card{width:185px;font-size:11px}.world-info span{font-size:11px;padding:6px 8px}
+  .ad-slot{width:calc(100% - 18px);height:70px}
+}
