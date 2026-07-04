@@ -38,3 +38,11 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
   .monster-card{width:185px;font-size:11px}.world-info span{font-size:11px;padding:6px 8px}
   .ad-slot{width:calc(100% - 18px);height:70px}
 }
+
+/* v10 side ads, no-player-HP UI, skill encyclopedia */
+.side-ad{position:fixed;top:84px;bottom:84px;width:128px;border:1px dashed rgba(255,255,255,.18);border-radius:18px;background:linear-gradient(180deg,#181225,#100c19);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:#cfc1e8;z-index:1;box-shadow:0 16px 40px rgba(0,0,0,.24);pointer-events:none;text-align:center;padding:12px}
+.side-ad-left{left:14px}.side-ad-right{right:14px}.side-ad span{font-weight:900;color:#fff}.side-ad small{font-size:12px;color:#a996c9}.game-screen,.topbar,.ad-slot{position:relative;z-index:2}.bars.compact{margin-top:8px}.btn-grid{grid-template-columns:1fr 1fr;gap:8px}.skilldex-box{max-width:920px}.dex-tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:10px 0 12px}.dex-tabs button{padding:9px 6px;border:1px solid rgba(255,255,255,.08);background:#171126}.dex-tabs button.active{outline:2px solid rgba(255,255,255,.32);filter:brightness(1.18)}.dex-tabs span{display:block;font-weight:900}.dex-tabs small{display:block;margin-top:2px;color:#b9a8d8;font-size:11px}.dex-list{max-height:62svh}.dex-item.locked{opacity:.42;filter:grayscale(.35)}.dex-item.owned{border-color:rgba(255,255,255,.18);background:rgba(124,58,237,.12)}
+@media(max-width:1480px){.side-ad{width:90px}.side-ad small{display:none}}
+@media(max-width:1240px){.side-ad{display:none}}
+@media(max-width:820px){.dex-tabs{grid-template-columns:repeat(4,1fr)}.dex-list{max-height:58svh}.btn-grid{grid-template-columns:1fr 1fr}.ad-slot{position:relative;z-index:2}}
+@media(max-width:480px){.dex-tabs{grid-template-columns:repeat(2,1fr)}.skilldex-box{width:94vw}.btn-grid{grid-template-columns:1fr 1fr}.btn-grid button{padding:10px 8px;font-size:13px}}

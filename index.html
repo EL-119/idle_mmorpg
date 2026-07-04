@@ -10,6 +10,8 @@
 </head>
 <body>
   <div id="app">
+    <aside class="side-ad side-ad-left" aria-label="좌측 광고 영역"><span>광고 영역</span><small>좌측 슬롯</small></aside>
+    <aside class="side-ad side-ad-right" aria-label="우측 광고 영역"><span>광고 영역</span><small>우측 슬롯</small></aside>
     <header class="topbar">
       <div>
         <h1>랜덤키우기</h1>
@@ -47,7 +49,6 @@
           <button id="newCharBtn" class="danger small">새 캐릭터</button>
         </div>
         <div class="bars compact">
-          <label>HP <span id="hpText">100 / 100</span></label><div class="bar"><i id="hpBar"></i></div>
           <label>EXP <span id="expText">0 / 100</span></label><div class="bar exp"><i id="expBar"></i></div>
         </div>
         <div class="stats-grid">
@@ -61,6 +62,7 @@
         <div class="btn-grid">
           <button id="huntBtn" class="primary">자동 사냥 중</button>
           <button id="passiveBtn">패시브 창</button>
+          <button id="skillDexBtn">스킬도감</button>
           <button id="exportBtn" class="ghost">내보내기</button>
           <button id="importBtn" class="ghost">가져오기</button>
         </div>
@@ -99,6 +101,14 @@
       <div class="modal-title"><h2>보유 패시브</h2><button id="passiveClose" class="ghost small">닫기</button></div>
       <div id="passiveSummary" class="passive-summary"></div>
       <div id="passiveList" class="passive-list"></div>
+    </div>
+  </div>
+
+  <div id="skillDexModal" class="modal">
+    <div class="modal-box passive-box skilldex-box">
+      <div class="modal-title"><h2>스킬도감</h2><button id="skillDexClose" class="ghost small">닫기</button></div>
+      <div id="skillDexTabs" class="dex-tabs"></div>
+      <div id="skillDexList" class="passive-list dex-list"></div>
     </div>
   </div>
 
