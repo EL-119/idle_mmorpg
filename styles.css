@@ -787,3 +787,25 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
   visibility:visible!important;
 }
 #createModal .modal-title{position:static!important;padding:0!important;background:transparent!important;}
+
+
+/* v33: 새 캐릭터 생성창 닫기 버튼 강제 정리 */
+.create-close-fixed,
+.modal-x,
+#createModal .modal-title button,
+#createModal button:not(#createBtn):not(#createCloseBottom){
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+#createCloseBottom{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  position:static!important;
+  width:100%!important;
+  margin-top:10px!important;
+  background:#2b2241!important;
+}
