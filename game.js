@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v25';
+const SAVE_KEY='random_growth_game_v27';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -95,7 +95,7 @@ function createCharacter(){
   const name=makeRandomName();
   const first=rollSkill([]);
   first.level = 1;
-  state={ name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now() };
+  state={ id:'player_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now() };
   state.monster=makeMonster();
   $('createModal').classList.remove('active');
   log(`${name} 생성 완료. 시작 패시브 ${first.gradeName} [${first.name}] 획득.`);
@@ -393,17 +393,11 @@ function renderMissions(){
 
 let currentRankMode='level';
 function buildRankingRows(mode='level'){
-  const names=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자','균열탐험가','전설수집러','스킬장인','폭풍헌터','무지개유저','자동사냥꾼','불멸초보','희귀수집가','에픽헌터','신화도전자','공속장인','치명타왕','관통마스터','경험치러너','구역개척자','랭킹추격자','초고속성장','운명의계정','패시브중독','최종진화자','오늘의강자'];
   const rows=[];
-  const baseLevel = state ? Math.max(1,state.level) : 1;
-  for(let i=0;i<30;i++){
-    const lv=Math.max(1, Math.round(420 - i*11 + ((i*37)%17) + (mode==='level'?0:(i%3)*5)));
-    const zone=ZONES.slice().reverse().find(z=>lv>=z.min) || ZONES[0];
-    rows.push({name:names[i%names.length], level:lv, zone:zone.name, zoneIndex:zone.index});
-  }
   if(state){
+    if(!state.id) state.id='player_'+(state.createdAt||Date.now());
     const z=currentZone();
-    rows.push({name:state.name || '나', level:baseLevel, zone:z.name, zoneIndex:z.index, me:true});
+    rows.push({name:state.name || '나', level:Math.max(1,state.level||1), zone:z.name, zoneIndex:z.index, me:true});
   }
   if(mode==='zone') rows.sort((a,b)=>(b.zoneIndex-a.zoneIndex)||(b.level-a.level));
   else rows.sort((a,b)=>b.level-a.level);
@@ -415,7 +409,12 @@ function renderRanking(mode=currentRankMode){
   const lvTab=$('rankLevelTab'), zoneTab=$('rankZoneTab');
   if(lvTab) lvTab.classList.toggle('active', mode==='level');
   if(zoneTab) zoneTab.classList.toggle('active', mode==='zone');
-  list.innerHTML=buildRankingRows(mode).map(r=>`<div class="rank-row ${r.me?'me':''}"><b>${r.rank}</b><span>${r.name}</span><em>Lv.${r.level}</em><small>${r.zone}</small></div>`).join('');
+  const rows=buildRankingRows(mode);
+  if(!rows.length){
+    list.innerHTML='<div class="empty-rank">아직 랭킹에 등록된 실제 플레이어가 없습니다. 캐릭터를 생성하고 플레이하면 여기에 표시됩니다.</div>';
+    return;
+  }
+  list.innerHTML=rows.map(r=>`<div class="rank-row ${r.me?'me':''}"><b>${r.rank}</b><span>${r.name}</span><em>Lv.${r.level}</em><small>${r.zone}</small></div>`).join('');
 }
 function openRanking(){ renderRanking(currentRankMode); $('rankingModal').classList.add('active'); }
 
@@ -464,7 +463,7 @@ function migrate(s){
   return state;
 }
 function load(){
-  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v21') || localStorage.getItem('random_growth_game_v20') || localStorage.getItem('random_growth_game_v19') || localStorage.getItem('random_growth_game_v18') || localStorage.getItem('random_growth_game_v17') || localStorage.getItem('random_growth_game_v16') || localStorage.getItem('random_growth_game_v15') || localStorage.getItem('random_growth_game_v14') || localStorage.getItem('random_growth_game_v13') || localStorage.getItem('random_growth_game_v12') || localStorage.getItem('random_growth_game_v11') || localStorage.getItem('random_growth_game_v10') || localStorage.getItem('random_growth_game_v9') || localStorage.getItem('random_growth_game_v8') || localStorage.getItem('random_growth_game_v7') || localStorage.getItem('random_growth_game_v6') || localStorage.getItem('random_growth_game_v5') || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
+  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v26') || localStorage.getItem('random_growth_game_v25') || localStorage.getItem('random_growth_game_v24') || localStorage.getItem('random_growth_game_v23') || localStorage.getItem('random_growth_game_v22') || localStorage.getItem('random_growth_game_v21') || localStorage.getItem('random_growth_game_v20') || localStorage.getItem('random_growth_game_v19') || localStorage.getItem('random_growth_game_v18') || localStorage.getItem('random_growth_game_v17') || localStorage.getItem('random_growth_game_v16') || localStorage.getItem('random_growth_game_v15') || localStorage.getItem('random_growth_game_v14') || localStorage.getItem('random_growth_game_v13') || localStorage.getItem('random_growth_game_v12') || localStorage.getItem('random_growth_game_v11') || localStorage.getItem('random_growth_game_v10') || localStorage.getItem('random_growth_game_v9') || localStorage.getItem('random_growth_game_v8') || localStorage.getItem('random_growth_game_v7') || localStorage.getItem('random_growth_game_v6') || localStorage.getItem('random_growth_game_v5') || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
   if(!raw) return false;
   try{ state=JSON.parse(raw); state=migrate(state); $('createModal').classList.remove('active'); render(); startLoop(); log('저장 데이터를 불러왔습니다.'); return true; }catch(e){ return false; }
 }
@@ -476,7 +475,7 @@ const statusBtn=$('statusBtn');
 if(statusBtn){ statusBtn.onclick=openStatusDetail; }
 
 $('createBtn').onclick=createCharacter;
-$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v22','random_growth_game_v21','random_growth_game_v20','random_growth_game_v19','random_growth_game_v18','random_growth_game_v17','random_growth_game_v16','random_growth_game_v15','random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
+$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v27','random_growth_game_v26','random_growth_game_v25','random_growth_game_v24','random_growth_game_v23','random_growth_game_v22','random_growth_game_v21','random_growth_game_v20','random_growth_game_v19','random_growth_game_v18','random_growth_game_v17','random_growth_game_v16','random_growth_game_v15','random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
 $('passiveBtn').onclick=()=>{$('passiveModal').classList.add('active'); renderPassives();};
