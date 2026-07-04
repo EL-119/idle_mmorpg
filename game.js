@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v11';
+const SAVE_KEY='random_growth_game_v12';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -216,6 +216,7 @@ function render(){
   $('monsterHpBar').style.width=`${Math.max(0,Math.min(100,state.monster.hp/state.monster.maxHp*100))}%`;
   renderMonsterForm();
   renderPassives();
+  renderStatusDetails();
 }
 function monsterFormTier(defense){
   if(defense < 1) return 0;
@@ -255,6 +256,23 @@ function renderSkillDex(grade=currentDexGrade){
     const cls=lv>=10 ? 'g-normal' : s.gradeClass;
     return `<div class="passive dex-item ${owned?'owned':'locked'}"><b><span class="${cls}">${s.name}</span><em class="grade ${cls}">${s.gradeName}${owned?' Lv.'+lv:' 미획득'}</em></b><p>${s.desc}</p></div>`;
   }).join('');
+}
+
+
+function renderStatusDetails(){
+  if(!state) return;
+  const st=calcStats();
+  const stacks=passiveStacks();
+  const totalLv=stacks.reduce((a,s)=>a+(s.level||1),0);
+  const m=state.monster || makeMonster();
+  const rows=[
+    ['닉네임', state.name], ['레벨', state.level], ['현재 EXP', `${state.exp} / ${needExp()}`], ['공격력', st.power],
+    ['공격속도', `${st.attackSpeed}/s`], ['공격 간격', `${st.attackMs}ms`], ['치명타', `${st.crit}%`], ['방어 관통', `${st.pierce}%`],
+    ['콤보 보정', `${st.combo}%`], ['처치 수', state.kills], ['보유 패시브', `${stacks.length}종`], ['총 패시브 Lv', totalLv],
+    ['몬스터', `${m.name} Lv.${m.level}`], ['몬스터 HP', `${Math.max(0,Math.round(m.hp))} / ${m.maxHp}`], ['몬스터 방어력', m.defense||0], ['몬스터 피격', `${m.hitCount||0}회`]
+  ];
+  const box=$('statusDetailGrid');
+  if(box) box.innerHTML=rows.map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join('');
 }
 
 function titleByLevel(lv){ if(lv>=100)return '신화적 존재'; if(lv>=80)return '운명을 찢는 존재'; if(lv>=60)return '초월자'; if(lv>=40)return '군림자'; if(lv>=20)return '각성체'; if(lv>=10)return '성장체'; return '새싹 존재'; }
@@ -302,29 +320,30 @@ function migrate(s){
   return state;
 }
 function load(){
-  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v10') || localStorage.getItem('random_growth_game_v9') || localStorage.getItem('random_growth_game_v8') || localStorage.getItem('random_growth_game_v7') || localStorage.getItem('random_growth_game_v6') || localStorage.getItem('random_growth_game_v5') || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
+  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v11') || localStorage.getItem('random_growth_game_v10') || localStorage.getItem('random_growth_game_v9') || localStorage.getItem('random_growth_game_v8') || localStorage.getItem('random_growth_game_v7') || localStorage.getItem('random_growth_game_v6') || localStorage.getItem('random_growth_game_v5') || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
   if(!raw) return false;
   try{ state=JSON.parse(raw); state=migrate(state); $('createModal').classList.remove('active'); render(); startLoop(); log('저장 데이터를 불러왔습니다.'); return true; }catch(e){ return false; }
 }
 function startLoop(){ clearInterval(loop); clearInterval(passiveTimer); const st=calcStats(); loop=setInterval(hunt, st.attackMs); passiveTimer=setInterval(tickPassiveSkills,1000); }
 
 
+function openStatusDetail(){ renderStatusDetails(); $('statusDetailModal').classList.add('active'); }
 const statusBtn=$('statusBtn');
-if(statusBtn){
-  statusBtn.onclick=()=>{
-    const panel=$('statusPanel');
-    if(panel) panel.classList.toggle('open');
-  };
-}
+if(statusBtn){ statusBtn.onclick=openStatusDetail; }
 
 $('createBtn').onclick=createCharacter;
-$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
+$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
 $('passiveBtn').onclick=()=>{$('passiveModal').classList.add('active'); renderPassives();};
 $('passiveClose').onclick=()=>$('passiveModal').classList.remove('active');
 $('skillDexBtn').onclick=()=>{ $('skillDexModal').classList.add('active'); renderSkillDex(); };
 $('skillDexClose').onclick=()=>$('skillDexModal').classList.remove('active');
+$('statusDetailBtn').onclick=openStatusDetail;
+$('statusDetailClose').onclick=()=>$('statusDetailModal').classList.remove('active');
+$('noticeBtn').onclick=()=>$('noticeModal').classList.add('active');
+$('noticePanelBtn').onclick=()=>$('noticeModal').classList.add('active');
+$('noticeClose').onclick=()=>$('noticeModal').classList.remove('active');
 $('exportBtn').onclick=()=>{ dataMode='export'; $('dataTitle').textContent='저장 데이터 내보내기'; $('dataBox').value=btoa(unescape(encodeURIComponent(JSON.stringify(state)))); $('dataApply').style.display='none'; $('dataModal').classList.add('active'); };
 $('importBtn').onclick=()=>{ dataMode='import'; $('dataTitle').textContent='저장 데이터 가져오기'; $('dataBox').value=''; $('dataApply').style.display='inline-block'; $('dataModal').classList.add('active'); };
 $('dataClose').onclick=()=>$('dataModal').classList.remove('active');
