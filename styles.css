@@ -858,10 +858,3 @@ body > .create-close-fixed,
 #createModal #createCloseBottom{
   pointer-events:auto!important;
 }
-/* v36 human player skin */
-.player{width:82px!important;height:126px!important;border-radius:18px 18px 12px 12px!important;background:linear-gradient(90deg,transparent 0 16%,#20283d 17% 32%,#53627f 33% 67%,#20283d 68% 83%,transparent 84%)!important;border:0!important;box-shadow:none!important;filter:drop-shadow(0 14px 12px rgba(0,0,0,.45))!important}
-.player:before{content:""!important;left:20px!important;right:20px!important;top:-38px!important;bottom:auto!important;height:48px!important;background:radial-gradient(circle at 50% 45%,#f4c7a1 0 44%,#5a3529 45% 63%,transparent 64%)!important;border-radius:48% 48% 42% 42%!important;box-shadow:0 3px 0 #191423!important}
-.player:after{content:""!important;left:9px!important;top:38px!important;width:64px!important;height:52px!important;background:linear-gradient(90deg,#1b2233 0 13%,transparent 14% 86%,#1b2233 87%),linear-gradient(135deg,transparent 43%,#d7b45a 44% 52%,transparent 53%)!important;border-radius:10px!important;opacity:1!important}
-.player .horn{display:none!important}.player .eye{top:-18px!important;width:7px!important;height:7px!important;background:#201722!important;z-index:2}.player .eye.left{left:29px!important}.player .eye.right{right:29px!important}.player .mouth{display:none!important}
-.player-tier-2{filter:drop-shadow(0 0 12px #38bdf8)!important}.player-tier-3{filter:drop-shadow(0 0 18px #a855f7)!important}.player-tier-4{filter:drop-shadow(0 0 22px #fbbf24)!important}.player-tier-5{filter:drop-shadow(0 0 28px #ef4444)!important}.player-tier-6{filter:drop-shadow(0 0 35px #fff)!important}
-@media(max-width:480px){.player{width:58px!important;height:90px!important}.player:before{left:14px!important;right:14px!important;top:-28px!important;height:36px!important}.player:after{left:6px!important;top:28px!important;width:46px!important;height:38px!important}.player .eye{top:-13px!important}.player .eye.left{left:20px!important}.player .eye.right{right:20px!important}}
