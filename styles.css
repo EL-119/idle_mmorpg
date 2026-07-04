@@ -1040,3 +1040,56 @@ body > .create-close-fixed,
  animation:walk 1.2s infinite ease-in-out !important;
 }
 .player:before,.player .horn,.player .eye,.player .mouth{display:none !important}
+
+
+
+/* v46 animated user-supplied 3D knight skin: replaces CSS face/body completely */
+.player{
+  width:190px !important;
+  height:270px !important;
+  left:calc(23% - 42px) !important;
+  bottom:18px !important;
+  background-image:url("player_skin_animated.png") !important;
+  background-size:760px 270px !important;
+  background-repeat:no-repeat !important;
+  background-position:0 0 !important;
+  background-color:transparent !important;
+  border-radius:0 !important;
+  transform-origin:50% 100% !important;
+  filter:drop-shadow(0 18px 10px rgba(0,0,0,.48)) drop-shadow(0 0 10px rgba(80,240,255,.36)) !important;
+  animation:playerSkinFrames .52s steps(4) infinite, playerSkinFloat 1.05s ease-in-out infinite !important;
+  image-rendering:auto !important;
+}
+.player:before,
+.player:after,
+.player .horn,
+.player .eye,
+.player .mouth{
+  display:none !important;
+  content:none !important;
+}
+@keyframes playerSkinFrames{
+  from{background-position:0 0}
+  to{background-position:-760px 0}
+}
+@keyframes playerSkinFloat{
+  0%,100%{transform:translateY(0) rotate(-1deg) scale(1)}
+  50%{transform:translateY(-8px) rotate(1.2deg) scale(1.025)}
+}
+.player.is-attacking,
+.player.attack,
+.battle-scene.attacking .player{
+  animation:playerSkinFrames .28s steps(4) infinite, playerSkinAttack .32s ease-in-out infinite !important;
+}
+@keyframes playerSkinAttack{
+  0%,100%{transform:translate(0,0) rotate(-2deg) scale(1)}
+  45%{transform:translate(18px,-7px) rotate(6deg) scale(1.05)}
+}
+.aura{
+  pointer-events:none !important;
+  animation:auraSpin 2.4s linear infinite, auraPulse .9s ease-in-out infinite !important;
+}
+@keyframes auraPulse{
+  0%,100%{transform:scale(1);opacity:.55}
+  50%{transform:scale(1.08);opacity:.9}
+}
