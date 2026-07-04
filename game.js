@@ -251,7 +251,7 @@ function render(){
   updatePlayerVisual(stacksForCount);
   $('aura').style.opacity = auraOpacity(stacksForCount);
   $('monsterName').textContent=state.monster.name;
-  $('monsterLevelText').textContent=`몬스터 Lv. ${state.monster.level}`;
+  if($('monsterLevelText')) $('monsterLevelText').textContent='';
   const zone=currentZone();
   $('zoneText').textContent=`${zone.name} · EXP +${zone.exp}% · 공격 +${zone.power}% · 속도 +${zone.speed}%`;
   $('stage').className='stage ' + zone.bg;
