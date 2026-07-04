@@ -85,7 +85,7 @@
 
   <div id="createModal" class="modal active">
     <div class="modal-box">
-      <h2>랜덤 캐릭터 생성</h2>
+      <div class="modal-title"><h2>랜덤 캐릭터 생성</h2><button id="createClose" class="ghost small">닫기</button></div>
       <p>닉네임과 시작 패시브가 모두 랜덤으로 정해집니다. 같은 패시브를 다시 얻으면 해당 스킬 레벨이 1씩 상승합니다.</p>
       <button id="createBtn" class="primary wide">랜덤 캐릭터 생성</button>
     </div>
@@ -126,7 +126,7 @@
   <div id="rankingModal" class="modal">
     <div class="modal-box ranking-box">
       <div class="modal-title"><h2>랭킹</h2><button id="rankingClose" class="ghost small">닫기</button></div>
-      <p>현재 랭킹은 가짜 NPC 없이 실제로 생성해 플레이 중인 캐릭터만 표시됩니다. 서버 연동 전에는 현재 기기의 플레이어 기록만 표시됩니다.</p>
+      <p>현재 랭킹은 실제로 생성해 플레이 중인 내 캐릭터만 표시됩니다. 서버 연동 전에는 가짜 유저를 절대 넣지 않습니다.</p>
       <div class="ranking-tabs">
         <button id="rankLevelTab" class="active">플레이어 레벨</button>
         <button id="rankZoneTab">현재 구역</button>
@@ -140,7 +140,7 @@
     <div class="modal-box notice-box">
       <div class="modal-title"><h2>공지사항</h2><button id="noticeClose" class="ghost small">닫기</button></div>
       <div class="notice-list">
-        <div class="notice-item"><b>v27 업데이트</b><p>가짜 고레벨 랭킹을 제거하고 실제 플레이어 랭킹 구조로 수정했습니다.</p></div>
+        <div class="notice-item"><b>v28 업데이트</b><p>가짜 랭킹 캐시를 제거하고 현재 실제 플레이 캐릭터만 랭킹에 표시되도록 수정했습니다.</p></div>
         <div class="notice-item"><b>랭킹 안내</b><p>가짜 랭킹을 제거하고 실제 플레이 중인 캐릭터만 표시되도록 변경했습니다.</p></div>
         <div class="notice-item"><b>게임 방향</b><p>랜덤 패시브를 중첩해 운에 따라 성장 속도가 크게 달라지는 자동 성장 구조를 유지합니다.</p></div>
       </div>
@@ -174,7 +174,7 @@
     </div>
   </div>
 
-  <script src="skills.js"></script>
-  <script src="game.js"></script>
+  <script src="skills.js?v=28"></script>
+  <script src="game.js?v=28"></script>
 </body>
 </html>
