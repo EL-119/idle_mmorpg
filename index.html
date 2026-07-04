@@ -13,62 +13,61 @@
     <header class="topbar">
       <div>
         <h1>랜덤키우기</h1>
-        <p>태어날 때부터 운명이 갈리는 자동 성장 RPG</p>
+        <p>랜덤 패시브를 중첩해서 끝없이 강해지는 자동 성장 RPG</p>
       </div>
       <button id="saveBtn" class="ghost">저장</button>
     </header>
 
-    <main class="layout">
-      <section class="panel hero-panel">
-        <div class="character-card">
-          <div class="stage" id="stage">
-            <div class="aura" id="aura"></div>
-            <div class="player" id="playerSprite">
-              <div class="horn left"></div>
-              <div class="horn right"></div>
-              <div class="eye left"></div>
-              <div class="eye right"></div>
-              <div class="mouth"></div>
-            </div>
-            <div class="enemy" id="enemySprite">
-              <div class="enemy-eye left"></div>
-              <div class="enemy-eye right"></div>
-            </div>
-            <div id="floatingText"></div>
+    <main class="game-screen">
+      <section class="panel stage-panel">
+        <div class="stage" id="stage">
+          <div class="world-info">
+            <span id="zoneText">초원 1구역</span>
+            <span id="monsterLevelText">몬스터 Lv. 1</span>
           </div>
-          <div class="char-info">
-            <div>
-              <h2 id="charName">무명의 씨앗</h2>
-              <p id="charTitle">Lv. 1 · 새싹 존재</p>
-            </div>
-            <button id="newCharBtn" class="danger">새 캐릭터</button>
+          <div class="aura" id="aura"></div>
+          <div class="player" id="playerSprite">
+            <div class="horn left"></div><div class="horn right"></div>
+            <div class="eye left"></div><div class="eye right"></div><div class="mouth"></div>
           </div>
-          <div class="bars">
-            <label>HP <span id="hpText">100 / 100</span></label>
-            <div class="bar"><i id="hpBar"></i></div>
-            <label>EXP <span id="expText">0 / 100</span></label>
-            <div class="bar exp"><i id="expBar"></i></div>
+          <div class="enemy" id="enemySprite"><div class="enemy-eye left"></div><div class="enemy-eye right"></div></div>
+          <div class="monster-card">
+            <b id="monsterName">슬라임</b>
+            <span id="monsterHpText">HP 40 / 40</span>
+            <div class="bar monster"><i id="monsterHpBar"></i></div>
           </div>
+          <div id="floatingText"></div>
         </div>
       </section>
 
-      <section class="panel stats-panel">
-        <h3>성장 정보</h3>
-        <div class="grid stats-grid">
+      <section class="panel info-panel">
+        <div class="char-head">
+          <div><h2 id="charName">무명의 씨앗</h2><p id="charTitle">Lv. 1 · 새싹 존재</p></div>
+          <button id="newCharBtn" class="danger small">새 캐릭터</button>
+        </div>
+        <div class="bars compact">
+          <label>HP <span id="hpText">100 / 100</span></label><div class="bar"><i id="hpBar"></i></div>
+          <label>EXP <span id="expText">0 / 100</span></label><div class="bar exp"><i id="expBar"></i></div>
+        </div>
+        <div class="stats-grid">
           <div><span>레벨</span><b id="level">1</b></div>
           <div><span>전투력</span><b id="power">10</b></div>
           <div><span>골드</span><b id="gold">0</b></div>
           <div><span>처치</span><b id="kills">0</b></div>
+          <div><span>패시브</span><b id="passiveCount">1</b></div>
+          <div><span>중첩</span><b id="stackCount">1</b></div>
         </div>
-        <button id="huntBtn" class="primary wide">자동 사냥 중</button>
-        <button id="passiveBtn" class="wide">패시브 목록</button>
-        <button id="exportBtn" class="wide ghost">저장 데이터 내보내기</button>
-        <button id="importBtn" class="wide ghost">저장 데이터 가져오기</button>
+        <div class="btn-grid">
+          <button id="huntBtn" class="primary">자동 사냥 중</button>
+          <button id="passiveBtn">패시브 창</button>
+          <button id="exportBtn" class="ghost">내보내기</button>
+          <button id="importBtn" class="ghost">가져오기</button>
+        </div>
       </section>
 
-      <section class="panel passive-panel">
-        <h3>보유 패시브</h3>
-        <div id="passiveList" class="passive-list"></div>
+      <section class="panel quick-panel">
+        <h3>최근 획득 패시브</h3>
+        <div id="quickPassiveList" class="quick-passives"></div>
       </section>
 
       <section class="panel log-panel">
@@ -81,7 +80,7 @@
   <div id="createModal" class="modal active">
     <div class="modal-box">
       <h2>랜덤 캐릭터 생성</h2>
-      <p>처음 생성 시 랜덤 패시브 1개를 가지고 시작합니다.</p>
+      <p>처음 생성 시 랜덤 패시브 1개를 가지고 시작합니다. 같은 패시브도 중첩 획득될 수 있습니다.</p>
       <input id="nameInput" placeholder="캐릭터 이름 입력" maxlength="12" />
       <button id="createBtn" class="primary wide">운명 뽑기</button>
     </div>
@@ -90,8 +89,16 @@
   <div id="choiceModal" class="modal">
     <div class="modal-box choice-box">
       <h2>10레벨 보상</h2>
-      <p>아래 3개의 랜덤 패시브 중 1개를 선택하세요.</p>
+      <p>아래 3개의 랜덤 패시브 중 1개를 선택하세요. 이미 보유한 스킬도 다시 나올 수 있습니다.</p>
       <div id="choiceList" class="choice-list"></div>
+    </div>
+  </div>
+
+  <div id="passiveModal" class="modal">
+    <div class="modal-box passive-box">
+      <div class="modal-title"><h2>보유 패시브</h2><button id="passiveClose" class="ghost small">닫기</button></div>
+      <div id="passiveSummary" class="passive-summary"></div>
+      <div id="passiveList" class="passive-list"></div>
     </div>
   </div>
 
@@ -99,10 +106,7 @@
     <div class="modal-box">
       <h2 id="dataTitle">저장 데이터</h2>
       <textarea id="dataBox" rows="8"></textarea>
-      <div class="row">
-        <button id="dataClose" class="ghost">닫기</button>
-        <button id="dataApply" class="primary">적용</button>
-      </div>
+      <div class="row"><button id="dataClose" class="ghost">닫기</button><button id="dataApply" class="primary">적용</button></div>
     </div>
   </div>
 
