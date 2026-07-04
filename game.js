@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v22';
+const SAVE_KEY='random_growth_game_v25';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -390,6 +390,35 @@ function renderMissions(){
   `;
 }
 
+
+let currentRankMode='level';
+function buildRankingRows(mode='level'){
+  const names=['그림자왕','무지개용사','심연검사','랜덤황제','초월토끼','붉은마도사','빙결기사','혼돈사도','안개추적자','전설수집가','오라군주','폭풍슬라임','균열방랑자','별빛오크','마왕후보','천공사냥꾼','운명의씨앗','폐허도적','분화구정령','신벌기사','검은늑대','푸른고블린','황금임프','독버섯장로','서리거인','공허눈동자','용암골렘','타락천사','혼돈룡','균열군주','불멸의초보'];
+  const rows=[];
+  const baseLevel = state ? Math.max(1,state.level) : 1;
+  for(let i=0;i<30;i++){
+    const lv=Math.max(1, Math.round(420 - i*11 + ((i*37)%17) + (mode==='level'?0:(i%3)*5)));
+    const zone=ZONES.slice().reverse().find(z=>lv>=z.min) || ZONES[0];
+    rows.push({name:names[i%names.length], level:lv, zone:zone.name, zoneIndex:zone.index});
+  }
+  if(state){
+    const z=currentZone();
+    rows.push({name:state.name || '나', level:baseLevel, zone:z.name, zoneIndex:z.index, me:true});
+  }
+  if(mode==='zone') rows.sort((a,b)=>(b.zoneIndex-a.zoneIndex)||(b.level-a.level));
+  else rows.sort((a,b)=>b.level-a.level);
+  return rows.slice(0,30).map((r,i)=>({...r, rank:i+1}));
+}
+function renderRanking(mode=currentRankMode){
+  currentRankMode=mode;
+  const list=$('rankingList'); if(!list) return;
+  const lvTab=$('rankLevelTab'), zoneTab=$('rankZoneTab');
+  if(lvTab) lvTab.classList.toggle('active', mode==='level');
+  if(zoneTab) zoneTab.classList.toggle('active', mode==='zone');
+  list.innerHTML=buildRankingRows(mode).map(r=>`<div class="rank-row ${r.me?'me':''}"><b>${r.rank}</b><span>${r.name}</span><em>Lv.${r.level}</em><small>${r.zone}</small></div>`).join('');
+}
+function openRanking(){ renderRanking(currentRankMode); $('rankingModal').classList.add('active'); }
+
 function titleByLevel(lv){ if(lv>=100)return '신화적 존재'; if(lv>=80)return '운명을 찢는 존재'; if(lv>=60)return '초월자'; if(lv>=40)return '군림자'; if(lv>=20)return '각성체'; if(lv>=10)return '성장체'; return '새싹 존재'; }
 function zoneName(){ return currentZone().name; }
 function hasHighGrade(){ return state.passives.some(s=>['legend','epic','god'].includes(s.grade)); }
@@ -456,11 +485,13 @@ $('skillDexBtn').onclick=()=>{ $('skillDexModal').classList.add('active'); rende
 $('skillDexClose').onclick=()=>$('skillDexModal').classList.remove('active');
 $('statusDetailBtn').onclick=openStatusDetail;
 $('statusDetailClose').onclick=()=>$('statusDetailModal').classList.remove('active');
-$('noticeBtn').onclick=()=>$('noticeModal').classList.add('active');
-$('noticePanelBtn').onclick=()=>$('noticeModal').classList.add('active');
+$('rankingBtn').onclick=openRanking;
+$('rankingPanelBtn').onclick=openRanking;
 $('missionBtn').onclick=()=>{ renderMissions(); $('missionModal').classList.add('active'); };
 $('missionPanelBtn').onclick=()=>{ renderMissions(); $('missionModal').classList.add('active'); };
-$('noticeClose').onclick=()=>$('noticeModal').classList.remove('active');
+$('rankingClose').onclick=()=>$('rankingModal').classList.remove('active');
+$('rankLevelTab').onclick=()=>renderRanking('level');
+$('rankZoneTab').onclick=()=>renderRanking('zone');
 $('missionClose').onclick=()=>$('missionModal').classList.remove('active');
 
 if($('supportBtn')) $('supportBtn').onclick=()=> $('supportModal').classList.add('active');
