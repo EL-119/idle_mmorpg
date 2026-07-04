@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v22';
+const SAVE_KEY='random_growth_game_v34';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -35,6 +35,30 @@ function nextZone(){
 
 function rand(max){ return Math.floor(Math.random()*max); }
 function nowSec(){ return Math.floor(Date.now()/1000); }
+
+function isFakePlayerName(name){
+  const fakeNames=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자','불멸자','패시브황','초월러너'];
+  return fakeNames.includes(String(name||'').trim());
+}
+function isRealLocalPlayer(obj){
+  if(!obj || !obj.name || !obj.id) return false;
+  if(isFakePlayerName(obj.name)) return false;
+  if(obj.isDummy===true || obj.fake===true || obj.npc===true) return false;
+  return true;
+}
+function clearFakeRankingCaches(){
+  const fakeNames=['랜덤용사','패시브왕','오라장인','초월검사','운빨마스터','성장천재','별빛유저','심연도전자','천공러너','마왕도전자','불멸자','패시브황','초월러너'];
+  try{
+    for(let i=localStorage.length-1;i>=0;i--){
+      const k=localStorage.key(i);
+      const v=localStorage.getItem(k)||'';
+      const isRankCache=/rank|ranking|leader|score|dummy|fake/i.test(k);
+      const hasFakeName=fakeNames.some(n=>v.includes(n));
+      if(isRankCache || hasFakeName) localStorage.removeItem(k);
+    }
+  }catch(e){}
+}
+
 function log(msg){ const el=$('log'); el.innerHTML = `<div>${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} · ${msg}</div>` + el.innerHTML; }
 
 function weightedGrade(){
@@ -92,11 +116,15 @@ function growMonsterOnHit(){
 
 
 function createCharacter(){
+  // 실제로 생성 버튼을 누른 순간에만 기존 캐릭터를 새 캐릭터로 교체한다.
+  clearInterval(loop);
+  clearInterval(passiveTimer);
   const name=makeRandomName();
   const first=rollSkill([]);
   first.level = 1;
-  state={ name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now() };
+  state={ id:'player_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now(), localHumanPlayer:true, rankingEligible:true, saveVersion:34 };
   state.monster=makeMonster();
+  newCharacterModalMode=false;
   $('createModal').classList.remove('active');
   log(`${name} 생성 완료. 시작 패시브 ${first.gradeName} [${first.name}] 획득.`);
   save(); render(); startLoop();
@@ -390,6 +418,29 @@ function renderMissions(){
   `;
 }
 
+
+let currentRankMode='level';
+function buildRankingRows(mode='level'){
+  clearFakeRankingCaches();
+  if(!state || !state.name || !state.id || !isRealLocalPlayer(state)) return [];
+  const z=currentZone();
+  return [{rank:1,name:state.name,level:Math.max(1,state.level||1),zone:z.name,zoneIndex:z.index,me:true}];
+}
+function renderRanking(mode=currentRankMode){
+  currentRankMode=mode;
+  const list=$('rankingList'); if(!list) return;
+  const lvTab=$('rankLevelTab'), zoneTab=$('rankZoneTab');
+  if(lvTab) lvTab.classList.toggle('active', mode==='level');
+  if(zoneTab) zoneTab.classList.toggle('active', mode==='zone');
+  const rows=buildRankingRows(mode);
+  if(!rows.length){
+    list.innerHTML='<div class="empty-rank">아직 랭킹에 등록된 실제 플레이어가 없습니다. 캐릭터를 생성하고 플레이하면 여기에 표시됩니다.</div>';
+    return;
+  }
+  list.innerHTML=rows.map(r=>`<div class="rank-row ${r.me?'me':''}"><b>${r.rank}</b><span>${r.name}</span><em>Lv.${r.level}</em><small>${r.zone}</small></div>`).join('');
+}
+function openRanking(){ renderRanking(currentRankMode); $('rankingModal').classList.add('active'); }
+
 function titleByLevel(lv){ if(lv>=100)return '신화적 존재'; if(lv>=80)return '운명을 찢는 존재'; if(lv>=60)return '초월자'; if(lv>=40)return '군림자'; if(lv>=20)return '각성체'; if(lv>=10)return '성장체'; return '새싹 존재'; }
 function zoneName(){ return currentZone().name; }
 function hasHighGrade(){ return state.passives.some(s=>['legend','epic','god'].includes(s.grade)); }
@@ -412,6 +463,14 @@ function sanitizeSkill(skill){
 
 function migrate(s){
   if(!s.lastPassiveTick) s.lastPassiveTick={};
+  if(s && s.name && s.id && !isFakePlayerName(s.name) && s.isDummy!==true && s.fake!==true && s.npc!==true){
+    // 기존 내 저장 데이터는 유지하되, 더미 랭킹 이름은 절대 실제 유저로 승격하지 않는다.
+    s.localHumanPlayer = s.localHumanPlayer !== false;
+    s.rankingEligible = s.rankingEligible !== false;
+    s.isDummy = false;
+    s.fake = false;
+    s.npc = false;
+  }
   if(Array.isArray(s.passives)){
     const merged={};
     s.passives.forEach(p=>{
@@ -435,9 +494,14 @@ function migrate(s){
   return state;
 }
 function load(){
-  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v21') || localStorage.getItem('random_growth_game_v20') || localStorage.getItem('random_growth_game_v19') || localStorage.getItem('random_growth_game_v18') || localStorage.getItem('random_growth_game_v17') || localStorage.getItem('random_growth_game_v16') || localStorage.getItem('random_growth_game_v15') || localStorage.getItem('random_growth_game_v14') || localStorage.getItem('random_growth_game_v13') || localStorage.getItem('random_growth_game_v12') || localStorage.getItem('random_growth_game_v11') || localStorage.getItem('random_growth_game_v10') || localStorage.getItem('random_growth_game_v9') || localStorage.getItem('random_growth_game_v8') || localStorage.getItem('random_growth_game_v7') || localStorage.getItem('random_growth_game_v6') || localStorage.getItem('random_growth_game_v5') || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
+  const raw=localStorage.getItem(SAVE_KEY);
   if(!raw) return false;
-  try{ state=JSON.parse(raw); state=migrate(state); $('createModal').classList.remove('active'); render(); startLoop(); log('저장 데이터를 불러왔습니다.'); return true; }catch(e){ return false; }
+  try{
+    state=JSON.parse(raw);
+    state=migrate(state);
+    if(!isRealLocalPlayer(state)){ localStorage.removeItem(SAVE_KEY); state=null; return false; }
+    $('createModal').classList.remove('active'); render(); startLoop(); log('저장 데이터를 불러왔습니다.'); return true;
+  }catch(e){ return false; }
 }
 function startLoop(){ clearInterval(loop); clearInterval(passiveTimer); const st=calcStats(); loop=setInterval(hunt, st.attackMs); passiveTimer=setInterval(tickPassiveSkills,1000); }
 
@@ -446,8 +510,62 @@ function openStatusDetail(){ renderStatusDetails(); $('statusDetailModal').class
 const statusBtn=$('statusBtn');
 if(statusBtn){ statusBtn.onclick=openStatusDetail; }
 
+
+function cleanupCreateModalCloseButtons(){
+  // 생성창에서는 하단 '창 닫기' 버튼 하나만 남긴다.
+  document.querySelectorAll('.create-close-fixed, .modal-x').forEach(el=>el.remove());
+  document.querySelectorAll('body > button').forEach(btn=>{
+    if((btn.textContent||'').trim()==='닫기') btn.remove();
+  });
+  const modal=$('createModal');
+  if(modal){
+    modal.querySelectorAll('button').forEach(btn=>{
+      if(btn.id !== 'createBtn' && btn.id !== 'createCloseBottom') btn.remove();
+    });
+  }
+}
+
 $('createBtn').onclick=createCharacter;
-$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v22','random_growth_game_v21','random_growth_game_v20','random_growth_game_v19','random_growth_game_v18','random_growth_game_v17','random_growth_game_v16','random_growth_game_v15','random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
+function closeCreateModal(){
+  cleanupCreateModalCloseButtons();
+  const m=$('createModal');
+  if(m) m.classList.remove('active');
+  newCharacterModalMode=false;
+  if(state){
+    state.auto=true;
+    save();
+    render();
+    startLoop();
+  }
+}
+if($('createCloseBottom')) $('createCloseBottom').onclick=closeCreateModal;
+
+function closeModalById(id){
+  const m=$(id);
+  if(m) m.classList.remove('active');
+  if(id==='createModal' && state){
+    state.auto = true;
+    save();
+    render();
+    startLoop();
+  }
+}
+document.addEventListener('click', (e)=>{
+  const btn=e.target.closest('[data-close-modal]');
+  if(btn){ closeModalById(btn.dataset.closeModal); }
+});
+
+$('newCharBtn').onclick=()=>{
+  if(!confirm('새 캐릭터 생성창을 열까요? 실제 생성 버튼을 누르기 전까지 현재 캐릭터는 유지됩니다.')) return;
+  newCharacterModalMode=true;
+  if(state){ state.auto=true; save(); render(); startLoop(); }
+  ['passiveModal','dataModal','rankingModal','missionModal','noticeModal','supportModal','statusDetailModal','skillDexModal'].forEach(id=>$(id)?.classList.remove('active'));
+  cleanupCreateModalCloseButtons();
+  $('createModal').classList.add('active');
+  // 혹시 이전 캐시에서 만든 상단 닫기 버튼이 뒤늦게 붙어도 바로 제거
+  setTimeout(cleanupCreateModalCloseButtons, 0);
+  setTimeout(cleanupCreateModalCloseButtons, 100);
+};
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
 $('passiveBtn').onclick=()=>{$('passiveModal').classList.add('active'); renderPassives();};
@@ -456,11 +574,15 @@ $('skillDexBtn').onclick=()=>{ $('skillDexModal').classList.add('active'); rende
 $('skillDexClose').onclick=()=>$('skillDexModal').classList.remove('active');
 $('statusDetailBtn').onclick=openStatusDetail;
 $('statusDetailClose').onclick=()=>$('statusDetailModal').classList.remove('active');
-$('noticeBtn').onclick=()=>$('noticeModal').classList.add('active');
-$('noticePanelBtn').onclick=()=>$('noticeModal').classList.add('active');
+if($('noticeBtn')) $('noticeBtn').onclick=()=>$('noticeModal').classList.add('active');
+if($('noticeClose')) $('noticeClose').onclick=()=>$('noticeModal').classList.remove('active');
+$('rankingBtn').onclick=openRanking;
+$('rankingPanelBtn').onclick=openRanking;
 $('missionBtn').onclick=()=>{ renderMissions(); $('missionModal').classList.add('active'); };
 $('missionPanelBtn').onclick=()=>{ renderMissions(); $('missionModal').classList.add('active'); };
-$('noticeClose').onclick=()=>$('noticeModal').classList.remove('active');
+$('rankingClose').onclick=()=>$('rankingModal').classList.remove('active');
+$('rankLevelTab').onclick=()=>renderRanking('level');
+$('rankZoneTab').onclick=()=>renderRanking('zone');
 $('missionClose').onclick=()=>$('missionModal').classList.remove('active');
 
 if($('supportBtn')) $('supportBtn').onclick=()=> $('supportModal').classList.add('active');
@@ -470,4 +592,31 @@ $('exportBtn').onclick=()=>{ dataMode='export'; $('dataTitle').textContent='저�
 $('importBtn').onclick=()=>{ dataMode='import'; $('dataTitle').textContent='저장 데이터 가져오기'; $('dataBox').value=''; $('dataApply').style.display='inline-block'; $('dataModal').classList.add('active'); };
 $('dataClose').onclick=()=>$('dataModal').classList.remove('active');
 $('dataApply').onclick=()=>{ try{ state=JSON.parse(decodeURIComponent(escape(atob($('dataBox').value.trim())))); state=migrate(state); save(); $('dataModal').classList.remove('active'); render(); startLoop(); log('가져오기 완료.'); }catch(e){ alert('저장 데이터 형식이 올바르지 않습니다.'); } };
-if(!load()) $('createModal').classList.add('active');
+clearFakeRankingCaches();
+cleanupCreateModalCloseButtons();
+setInterval(cleanupCreateModalCloseButtons, 500);
+if(!load()) { $('createModal').classList.add('active'); cleanupCreateModalCloseButtons(); }
+
+
+// v35 hard fix: create modal must never pause hunting or block the hunt button.
+(function createModalNonBlockingHuntFix(){
+  const createModal = $('createModal');
+  const huntButton = $('huntBtn');
+  if(createModal){
+    createModal.style.pointerEvents = 'none';
+    const box = createModal.querySelector('.modal-box');
+    if(box) box.style.pointerEvents = 'auto';
+  }
+  if(huntButton){
+    huntButton.style.pointerEvents = 'auto';
+  }
+  setInterval(()=>{
+    if(state && state.auto && !loop){ startLoop(); }
+    const m=$('createModal');
+    if(m && m.classList.contains('active')){
+      m.style.pointerEvents='none';
+      const box=m.querySelector('.modal-box');
+      if(box) box.style.pointerEvents='auto';
+    }
+  }, 500);
+})();
