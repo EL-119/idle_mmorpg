@@ -17,7 +17,7 @@
         <h1>랜덤키우기</h1>
         <p>랜덤 패시브를 중첩해서 끝없이 강해지는 자동 성장 RPG</p>
       </div>
-      <div class="top-actions"><button id="statusBtn" class="mobile-status-btn">스테이터스</button><button id="noticeBtn" class="ghost">공지</button><button id="saveBtn" class="ghost">저장</button></div>
+      <div class="top-actions"><button id="statusBtn" class="mobile-status-btn">스테이터스</button><button id="noticeBtn" class="ghost">공지</button><button id="missionBtn" class="ghost">임무</button><button id="saveBtn" class="ghost">저장</button></div>
     </header>
 
     <main class="game-screen">
@@ -65,6 +65,7 @@
           <button id="skillDexBtn">스킬도감</button>
           <button id="statusDetailBtn">스테이터스</button>
           <button id="noticePanelBtn" class="ghost">공지사항</button>
+          <button id="missionPanelBtn" class="ghost">임무</button>
           <button id="exportBtn" class="ghost">내보내기</button>
           <button id="importBtn" class="ghost">가져오기</button>
         </div>
@@ -126,10 +127,18 @@
     <div class="modal-box notice-box">
       <div class="modal-title"><h2>공지사항</h2><button id="noticeClose" class="ghost small">닫기</button></div>
       <div class="notice-list">
-        <div class="notice-item"><b>v13 업데이트</b><p>스테이터스 상세 정보가 확장되었고, 스킬 레벨은 등급 변경 없이 계속 상승합니다.</p></div>
-        <div class="notice-item"><b>스킬 개편</b><p>같은 등급 안에서도 스킬 이름과 효과가 최대한 겹치지 않도록 스킬 구성을 재정리했습니다.</p></div>
+        <div class="notice-item"><b>v14 업데이트</b><p>등급별 스킬 효율 격차를 크게 조정했고, 고등급 자동공격 패시브의 위력을 강화했습니다.</p></div>
+        <div class="notice-item"><b>자동공격 패시브</b><p>매직 20개, 레어 12개, 유니크 7개, 전설 3개, 에픽 2개, 신 1개가 자동공격 패시브로 구성됩니다.</p></div>
         <div class="notice-item"><b>게임 방향</b><p>초반에 좋은 패시브를 얻으면 성장 속도가 크게 빨라지는 완전 랜덤 성장 구조를 유지합니다.</p></div>
       </div>
+    </div>
+  </div>
+
+  <div id="missionModal" class="modal">
+    <div class="modal-box notice-box mission-box">
+      <div class="modal-title"><h2>임무</h2><button id="missionClose" class="ghost small">닫기</button></div>
+      <p>외형, 오라, 자동공격 스킬 구성 조건을 확인할 수 있습니다.</p>
+      <div id="missionList" class="mission-list"></div>
     </div>
   </div>
 

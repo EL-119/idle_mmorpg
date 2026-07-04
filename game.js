@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const SAVE_KEY='random_growth_game_v13';
+const SAVE_KEY='random_growth_game_v14';
 let state = null;
 let loop = null;
 let passiveTimer = null;
@@ -154,7 +154,7 @@ function tickPassiveSkills(){
       if(t-last>=s.interval){
         state.lastPassiveTick[key]=t;
         if(type==='autoStrike'){
-          const dmg=Math.round(st.power*(0.35+(s.value*s.level)/100));
+          const dmg=Math.round(st.power*(0.45+(s.value*s.level)/100));
           damageMonster(dmg, `${s.name} `, 'skill');
           log(`[${s.name}] 발동. 추가 피해 ${dmg}.`);
         }
@@ -226,6 +226,7 @@ function render(){
   renderMonsterForm();
   renderPassives();
   renderStatusDetails();
+  renderMissions();
 }
 function monsterFormTier(defense){
   if(defense < 1) return 0;
@@ -286,6 +287,31 @@ function renderStatusDetails(){
   if(box) box.innerHTML=rows.map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join('');
 }
 
+function renderMissions(){
+  const box=$('missionList');
+  if(!box || !state) return;
+  const stacks=passiveStacks();
+  const uniqueCount=stacks.length;
+  const totalLv=passiveTotalLv(stacks);
+  const charSteps=[
+    ['기본 외형',0],['외형 1단계',2],['외형 2단계',5],['외형 3단계',10],['외형 4단계',18],['외형 5단계',28],['최종 외형',40]
+  ];
+  const auraSteps=[
+    ['기본 오라',1],['오라 1단계',4],['오라 2단계',10],['오라 3단계',22],['오라 4단계',38],['오라 5단계',60],['최종 오라',90]
+  ];
+  const autoCounts={};
+  SKILL_POOL.filter(s=>s.statType==='autoStrike').forEach(s=>{autoCounts[s.grade]=(autoCounts[s.grade]||0)+1;});
+  const autoRows=GRADES.filter(g=>autoCounts[g.key]).map(g=>`<div class="mission-item"><b><span class="${g.cls}">${g.name}</span> 자동공격 패시브</b><p>도감 내 ${autoCounts[g.key]}개 구성</p></div>`).join('');
+  box.innerHTML=`
+    <h3>캐릭터 외형 변경 조건</h3>
+    ${charSteps.map(([name,need])=>`<div class="mission-item ${uniqueCount>=need?'done':''}"><b>${name}</b><p>고유 패시브 ${need}개 필요 · 현재 ${uniqueCount}개</p></div>`).join('')}
+    <h3>오라 변경 조건</h3>
+    ${auraSteps.map(([name,need])=>`<div class="mission-item ${totalLv>=need?'done':''}"><b>${name}</b><p>총 패시브 레벨 ${need} 필요 · 현재 ${totalLv}</p></div>`).join('')}
+    <h3>자동공격 스킬 구성</h3>
+    ${autoRows}
+  `;
+}
+
 function titleByLevel(lv){ if(lv>=100)return '신화적 존재'; if(lv>=80)return '운명을 찢는 존재'; if(lv>=60)return '초월자'; if(lv>=40)return '군림자'; if(lv>=20)return '각성체'; if(lv>=10)return '성장체'; return '새싹 존재'; }
 function zoneName(){ const lv=state.monster.level; if(lv>=80)return '종말'; if(lv>=60)return '마계'; if(lv>=40)return '심연'; if(lv>=20)return '황무지'; return '초원'; }
 function hasHighGrade(){ return state.passives.some(s=>['legend','epic','god'].includes(s.grade)); }
@@ -331,7 +357,7 @@ function migrate(s){
   return state;
 }
 function load(){
-  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v12') || localStorage.getItem('random_growth_game_v11') || localStorage.getItem('random_growth_game_v10') || localStorage.getItem('random_growth_game_v9') || localStorage.getItem('random_growth_game_v8') || localStorage.getItem('random_growth_game_v7') || localStorage.getItem('random_growth_game_v6') || localStorage.getItem('random_growth_game_v5') || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
+  const raw=localStorage.getItem(SAVE_KEY) || localStorage.getItem('random_growth_game_v13') || localStorage.getItem('random_growth_game_v12') || localStorage.getItem('random_growth_game_v11') || localStorage.getItem('random_growth_game_v10') || localStorage.getItem('random_growth_game_v9') || localStorage.getItem('random_growth_game_v8') || localStorage.getItem('random_growth_game_v7') || localStorage.getItem('random_growth_game_v6') || localStorage.getItem('random_growth_game_v5') || localStorage.getItem('random_growth_game_v4') || localStorage.getItem('random_growth_game_v3') || localStorage.getItem('random_growth_game_v2') || localStorage.getItem('random_growth_game_v1');
   if(!raw) return false;
   try{ state=JSON.parse(raw); state=migrate(state); $('createModal').classList.remove('active'); render(); startLoop(); log('저장 데이터를 불러왔습니다.'); return true; }catch(e){ return false; }
 }
@@ -343,7 +369,7 @@ const statusBtn=$('statusBtn');
 if(statusBtn){ statusBtn.onclick=openStatusDetail; }
 
 $('createBtn').onclick=createCharacter;
-$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
+$('newCharBtn').onclick=()=>{ if(confirm('새 캐릭터를 만들면 현재 저장 데이터가 삭제됩니다.')){ clearInterval(loop); clearInterval(passiveTimer); ['random_growth_game_v14','random_growth_game_v13','random_growth_game_v12','random_growth_game_v11','random_growth_game_v10','random_growth_game_v9','random_growth_game_v8','random_growth_game_v7','random_growth_game_v6','random_growth_game_v5','random_growth_game_v4','random_growth_game_v3','random_growth_game_v2','random_growth_game_v1'].forEach(k=>localStorage.removeItem(k)); state=null; pendingChoices=[]; $('choiceModal').classList.remove('active'); $('passiveModal').classList.remove('active'); $('dataModal').classList.remove('active'); $('createModal').classList.add('active'); $('log').innerHTML=''; } };
 $('saveBtn').onclick=()=>{ save(); log('저장 완료.'); };
 $('huntBtn').onclick=()=>{ state.auto=!state.auto; save(); render(); };
 $('passiveBtn').onclick=()=>{$('passiveModal').classList.add('active'); renderPassives();};
@@ -354,7 +380,10 @@ $('statusDetailBtn').onclick=openStatusDetail;
 $('statusDetailClose').onclick=()=>$('statusDetailModal').classList.remove('active');
 $('noticeBtn').onclick=()=>$('noticeModal').classList.add('active');
 $('noticePanelBtn').onclick=()=>$('noticeModal').classList.add('active');
+$('missionBtn').onclick=()=>{ renderMissions(); $('missionModal').classList.add('active'); };
+$('missionPanelBtn').onclick=()=>{ renderMissions(); $('missionModal').classList.add('active'); };
 $('noticeClose').onclick=()=>$('noticeModal').classList.remove('active');
+$('missionClose').onclick=()=>$('missionModal').classList.remove('active');
 $('exportBtn').onclick=()=>{ dataMode='export'; $('dataTitle').textContent='저장 데이터 내보내기'; $('dataBox').value=btoa(unescape(encodeURIComponent(JSON.stringify(state)))); $('dataApply').style.display='none'; $('dataModal').classList.add('active'); };
 $('importBtn').onclick=()=>{ dataMode='import'; $('dataTitle').textContent='저장 데이터 가져오기'; $('dataBox').value=''; $('dataApply').style.display='inline-block'; $('dataModal').classList.add('active'); };
 $('dataClose').onclick=()=>$('dataModal').classList.remove('active');

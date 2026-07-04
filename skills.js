@@ -30,19 +30,31 @@ const SUFFIX_BY_TYPE = {
   execute:['처형본능','마무리손길','끝장감각','절명표식','사냥종결자'],
   overdrive:['과부하','전투가열','분노축적','열혈회로','광전사본능']
 };
-const TYPES = ['power','crit','critDamage','speed','autoStrike','expPulse','pierce','combo','flatExp','execute','overdrive'];
+
+const AUTO_STRIKE_QUOTA = { normal:0, magic:20, rare:12, unique:7, legend:3, epic:2, god:1 };
+const GRADE_SCALE = { normal:1, magic:2.4, rare:5, unique:10, legend:22, epic:48, god:120 };
+const GRADE_AUTO_SCALE = { normal:0, magic:1.6, rare:3.5, unique:8, legend:20, epic:45, god:140 };
+const TYPES = ['power','crit','critDamage','speed','pierce','combo','flatExp','execute','overdrive','expPulse'];
 
 function makeSkillPool(){
   const pool=[];
   GRADES.forEach(g=>{
+    const autoQuota=AUTO_STRIKE_QUOTA[g.key] || 0;
+    const scale=GRADE_SCALE[g.key] || 1;
+    const autoScale=GRADE_AUTO_SCALE[g.key] || scale;
     for(let i=1;i<=g.count;i++){
       const p=PREFIX[g.key][(i-1)%PREFIX[g.key].length];
-      const scale={normal:1,magic:1.6,rare:2.4,unique:3.6,legend:5.5,epic:8,god:13}[g.key];
-      const statType=TYPES[(i-1)%TYPES.length];
+      const statType = i <= autoQuota ? 'autoStrike' : TYPES[(i-autoQuota-1)%TYPES.length];
       const suffixes=SUFFIX_BY_TYPE[statType] || ['전투감각'];
-      const s=suffixes[Math.floor((i-1)/TYPES.length)%suffixes.length];
-      const value=Math.max(1,Math.round((2+(i%17))*scale + Math.floor(i/TYPES.length)));
-      const interval=Math.max(2, Math.round(10 - Math.min(7, scale/1.5) + ((i%3)-1)));
+      const s=suffixes[(i-1)%suffixes.length];
+      const rawBase = statType === 'autoStrike'
+        ? (8 + i*3) * autoScale
+        : (4 + i*1.7 + ((i%7)*3)) * scale;
+      let value=Math.max(1,Math.round(rawBase));
+      if(statType==='crit') value=Math.max(1,Math.round(rawBase/2));
+      if(statType==='speed') value=Math.max(1,Math.round(rawBase/3));
+      if(statType==='pierce') value=Math.max(1,Math.round(rawBase/4));
+      const interval=Math.max(1.2, +(6.5 - Math.min(4.8, Math.log2(scale+1)) + ((i%3)*0.25)).toFixed(1));
       pool.push({
         id:`${g.key}_${i}`,
         name:`${p} ${s}`,
@@ -65,8 +77,8 @@ function describeSkill(type,value,grade,interval){
     crit:`치명타 확률이 ${Math.max(1,Math.floor(value/2))}% 증가합니다.`,
     critDamage:`치명타 데미지가 ${Math.max(2,Math.floor(value*1.4))}% 증가합니다.`,
     speed:`공격속도가 빨라집니다. 중첩될수록 공격 간격이 더 짧아집니다.`,
-    autoStrike:`${interval}초마다 몬스터에게 공격력 기반 추가 피해를 줍니다.`,
-    expPulse:`${interval}초마다 추가 경험치를 획득합니다.`,
+    autoStrike:`${interval}초마다 스킬명으로 발동하며 공격력 기반 추가 피해를 줍니다. 기본 계수 ${value}%가 적용됩니다.`,
+    expPulse:`${interval}초마다 추가 경험치를 획득합니다. 고등급일수록 획득량 격차가 크게 벌어집니다.`,
     pierce:`몬스터 방어력을 ${value}% 무시합니다.`,
     combo:`일반 공격 피해량이 ${value}% 증가합니다.`,
     flatExp:`공격할 때마다 추가 경험치를 ${value} 획득합니다.`,
