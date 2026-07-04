@@ -1,7 +1,93 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>마계 진화록</title><link rel="stylesheet" href="styles.css"></head><body>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>마계 진화록 v2</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
 <div id="game">
-<header><b>마계 진화록</b><span>서부 초원 · 자동사냥</span><button id="save">저장</button></header>
-<section class="hud"><div class="profile"><div class="portrait">G</div><div><b>고블린 새끼</b><small>Lv. 1 · 최하급 마물</small><div class="bar hp"><i></i></div><div class="bar mp"><i></i></div></div></div><div class="quest"><b>진화의 길</b><small>고블린 전사 진화</small><p>슬라임 처치 <em id="kills">0</em> / 10</p></div></section>
-<main id="field"><div class="mist"></div><div class="path"></div><div class="trees"></div><div class="rock r1"></div><div class="rock r2"></div><div class="player"><div class="name">고블린 새끼 Lv.1</div><div class="pbar"><i></i></div><div class="goblin"></div></div><div class="enemy"><div class="name">푸른 슬라임</div><div class="ebar"><i></i></div><div class="slime"></div></div><div id="hit"></div></main>
-<section class="bottom"><div class="stats"><div>전투력 <b id="power">12</b></div><div>레벨 <b id="level">1</b></div><div>경험치 <b id="exp">0 / 100</b></div><div>마력석 <b id="gold">0</b></div></div><div class="log" id="log">자동사냥을 시작합니다.</div><div class="controls"><div class="joy">●</div><button id="auto">AUTO<br><small>자동사냥</small></button><button id="skill">독침</button><button id="evolve">진화<br><small>조건 미달</small></button><button>가방</button><button>스킬</button></div></section>
-</div><script src="script.js"></script></body></html>
+  <header class="topbar">
+    <div>
+      <b>마계 진화록</b>
+      <span>마물 진화 방치형 RPG</span>
+    </div>
+    <button id="saveBtn">저장</button>
+  </header>
+
+  <section class="hud">
+    <div class="profile">
+      <div class="portrait goblinFace">
+        <span></span>
+      </div>
+      <div class="profileText">
+        <b id="heroName">고블린 새끼</b>
+        <small id="heroRank">Lv. 1 · 최하급 마물</small>
+        <div class="bar hp"><i id="hpBar"></i></div>
+        <div class="bar mp"><i></i></div>
+      </div>
+    </div>
+
+    <div class="quest">
+      <b>진화의 길</b>
+      <small>고블린 전사 진화 조건</small>
+      <p>마물 처치 <em id="killText">0</em> / 20</p>
+      <p>마력석 <em id="stoneText">0</em> / 80</p>
+    </div>
+  </section>
+
+  <main id="field">
+    <div class="mapShade"></div>
+    <div class="river"></div>
+    <div class="road"></div>
+    <div class="grass g1"></div>
+    <div class="grass g2"></div>
+    <div class="grass g3"></div>
+    <div class="tree t1"><i></i></div>
+    <div class="tree t2"><i></i></div>
+    <div class="tree t3"><i></i></div>
+    <div class="tree t4"><i></i></div>
+    <div class="stone s1"></div>
+    <div class="stone s2"></div>
+    <div class="stone s3"></div>
+    <div id="entities"></div>
+    <div id="floating"></div>
+  </main>
+
+  <section class="bottom">
+    <div class="stats">
+      <div>전투력 <b id="powerText">12</b></div>
+      <div>레벨 <b id="levelText">1</b></div>
+      <div>경험치 <b id="expText">0 / 100</b></div>
+      <div>마력석 <b id="goldText">0</b></div>
+    </div>
+
+    <div class="log" id="log">자동사냥을 시작합니다. 고블린이 근처 마물을 추적합니다.</div>
+
+    <div class="controls">
+      <button class="joy" id="moveBtn"><span></span></button>
+      <button id="autoBtn" class="green">AUTO<br><small>자동사냥</small></button>
+      <button id="skillBtn" class="red">독침<br><small>스킬</small></button>
+      <button id="evolveBtn" class="gold">진화<br><small>조건 미달</small></button>
+      <button id="bagBtn">가방<br><small>장비</small></button>
+      <button id="skillPageBtn">스킬<br><small>특성</small></button>
+    </div>
+  </section>
+
+  <div class="panel" id="bagPanel">
+    <b>가방</b>
+    <p>낡은 몽둥이, 찢어진 가죽옷, 작은 마력석 조각을 보유 중입니다.</p>
+    <button class="closePanel">닫기</button>
+  </div>
+
+  <div class="panel" id="skillPanel">
+    <b>고유 특성</b>
+    <p>독침: 대상에게 즉시 피해를 주고 짧은 시간 동안 독 이펙트를 남깁니다.</p>
+    <p>야생 본능: 자동사냥 중 가장 가까운 마물을 추적합니다.</p>
+    <button class="closePanel">닫기</button>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
