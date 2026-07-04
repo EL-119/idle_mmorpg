@@ -596,27 +596,3 @@ clearFakeRankingCaches();
 cleanupCreateModalCloseButtons();
 setInterval(cleanupCreateModalCloseButtons, 500);
 if(!load()) { $('createModal').classList.add('active'); cleanupCreateModalCloseButtons(); }
-
-
-// v35 hard fix: create modal must never pause hunting or block the hunt button.
-(function createModalNonBlockingHuntFix(){
-  const createModal = $('createModal');
-  const huntButton = $('huntBtn');
-  if(createModal){
-    createModal.style.pointerEvents = 'none';
-    const box = createModal.querySelector('.modal-box');
-    if(box) box.style.pointerEvents = 'auto';
-  }
-  if(huntButton){
-    huntButton.style.pointerEvents = 'auto';
-  }
-  setInterval(()=>{
-    if(state && state.auto && !loop){ startLoop(); }
-    const m=$('createModal');
-    if(m && m.classList.contains('active')){
-      m.style.pointerEvents='none';
-      const box=m.querySelector('.modal-box');
-      if(box) box.style.pointerEvents='auto';
-    }
-  }, 500);
-})();
