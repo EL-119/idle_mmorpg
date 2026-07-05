@@ -898,3 +898,46 @@ body > .create-close-fixed,
   .mobile-e119-wrap{padding:0 6px!important;margin-top:6px!important}
   .mobile-e119-wrap .e119-mobile-ad{height:96px!important;border-radius:14px!important}
 }
+
+
+/* v40 fixes: remove domain text from image assets and force mobile banner visibility */
+@media(max-width:900px){
+  #app{
+    overflow-y:auto!important;
+  }
+  .mobile-e119-wrap{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    width:100%!important;
+    max-width:760px!important;
+    margin:8px auto 6px!important;
+    padding:0 10px!important;
+    position:relative!important;
+    z-index:100!important;
+  }
+  .mobile-e119-wrap .e119-mobile-ad{
+    display:block!important;
+    width:100%!important;
+    height:120px!important;
+    min-height:120px!important;
+    border-radius:16px!important;
+    background:url("e119_mobile_banner.png") center center / 100% 100% no-repeat!important;
+    box-shadow:0 0 0 2px rgba(255,61,85,.26),0 10px 24px rgba(0,0,0,.32)!important;
+  }
+  .side-ad-left{
+    display:none!important;
+  }
+}
+@media(max-width:480px){
+  .mobile-e119-wrap{
+    display:block!important;
+    padding:0 6px!important;
+    margin:6px auto 5px!important;
+  }
+  .mobile-e119-wrap .e119-mobile-ad{
+    height:96px!important;
+    min-height:96px!important;
+    border-radius:14px!important;
+  }
+}
