@@ -136,8 +136,33 @@ function passiveStacks(){
 }
 function gradePower(g){ return {normal:1,magic:2,rare:3,unique:4,legend:5,epic:6,god:7}[g] || 1; }
 
+const AURA_EXP_BONUS = [0, 3, 7, 12, 18, 26, 36, 50, 68, 90, 118, 150];
+const FORM_POWER_BONUS = [0, 5, 12, 22, 36, 55, 80];
+const FORM_SPEED_BONUS = [0, 3, 7, 12, 18, 25, 35];
+const FORM_NAMES = ['기본 외형','새싹 외형','푸른 각성체','보라 별각성','황금 화염체','심연 균열체','초월 은하체'];
+const AURA_NAMES = ['기본 잔광','새싹 광륜','푸른 번개진','보라 별문장','황금 화염관','붉은 균열핵','무지개 신성폭풍','천공 별폭풍','심연 블랙홀','백금 태양관','흑백 일식진','초월 은하폭주'];
+
+function formBonusByTier(tier){
+  return {
+    name: FORM_NAMES[tier] || FORM_NAMES[0],
+    power: FORM_POWER_BONUS[tier] || 0,
+    speed: FORM_SPEED_BONUS[tier] || 0
+  };
+}
+function auraBonusByTier(tier){
+  return {
+    name: AURA_NAMES[tier] || AURA_NAMES[0],
+    exp: AURA_EXP_BONUS[tier] || 0
+  };
+}
+
 function calcStats(){
-  const stats={ power:base.power+state.level*2, crit:3, critDamage:180, attackMs:base.baseAttackMs, pierce:0, combo:0, flatExp:0, execute:0, overdrive:0, autoStrike:[], expPulse:[] };
+  const stacksForVisual = passiveStacks();
+  const formTier = playerVisualTier(stacksForVisual);
+  const auraTier = auraVisualTier(stacksForVisual);
+  const formBonus = formBonusByTier(formTier);
+  const auraBonus = auraBonusByTier(auraTier);
+  const stats={ power:base.power+state.level*2, crit:3, critDamage:180, attackMs:base.baseAttackMs, pierce:0, combo:0, flatExp:0, execute:0, overdrive:0, autoStrike:[], expPulse:[], formTier, auraTier, formBonus, auraBonus, formPowerBonus:formBonus.power, formSpeedBonus:formBonus.speed, auraExpBonus:auraBonus.exp };
   state.passives.forEach(s=>{
     const lv = Math.max(1, s.level || 1);
     if(s.statType==='hp') s.statType='power';
@@ -156,8 +181,9 @@ function calcStats(){
   const zone=currentZone();
   stats.zone=zone;
   stats.zoneExp=zone.exp||0;
-  stats.power=Math.round(stats.power * (1 + Math.min(250, stats.combo)/100) * (1 + (zone.power||0)/100));
+  stats.power=Math.round(stats.power * (1 + Math.min(250, stats.combo)/100) * (1 + (zone.power||0)/100) * (1 + (stats.formPowerBonus||0)/100));
   stats.attackMs-=Math.round(base.baseAttackMs*((zone.speed||0)/100));
+  stats.attackMs-=Math.round(base.baseAttackMs*((stats.formSpeedBonus||0)/100));
   stats.crit=Math.min(85,stats.crit);
   stats.critDamage=Math.min(1000,stats.critDamage);
   stats.pierce=Math.min(95,stats.pierce);
@@ -186,7 +212,7 @@ function damageMonster(amount,prefix='', effectType='normal'){
   let actual=Math.max(1, amount-effectiveDefense);
   if((st.execute||0)>0 && state.monster.hp/state.monster.maxHp <= 0.3){ actual=Math.round(actual*(1+st.execute/100)); }
   state.monster.hp-=actual;
-  const expGain=Math.max(1, Math.round((actual + (st.flatExp||0)) * (1 + (st.zoneExp||0)/100))); state.exp+=expGain;
+  const expGain=Math.max(1, Math.round((actual + (st.flatExp||0)) * (1 + ((st.zoneExp||0) + (st.auraExpBonus||0))/100))); state.exp+=expGain;
   showHit(`${prefix}-${actual} · EXP +${expGain}`);
   spawnAttackEffect(effectType, prefix);
 
@@ -219,7 +245,7 @@ function tickPassiveSkills(){
           log(`[${s.name}] 발동. 추가 피해 ${dmg}.`);
         }
         if(type==='expPulse'){
-          const exp=Math.round(((s.value*s.level)+state.level*2) * (1 + (st.zoneExp||0)/100));
+          const exp=Math.round(((s.value*s.level)+state.level*2) * (1 + ((st.zoneExp||0) + (st.auraExpBonus||0))/100));
           state.exp+=exp;
           spawnPlayerEffect('exp', s.name);
           log(`[${s.name}] 발동. 경험치 ${exp} 획득.`);
@@ -281,7 +307,7 @@ function render(){
   $('monsterName').textContent=state.monster.name;
   if($('monsterLevelText')) $('monsterLevelText').textContent='';
   const zone=currentZone();
-  $('zoneText').textContent=`${zone.name} · EXP +${zone.exp}% · 공격 +${zone.power}% · 속도 +${zone.speed}%`;
+  $('zoneText').textContent=`${zone.name} · 구역 EXP +${zone.exp}% · 오라 EXP +${st.auraExpBonus||0}% · 외형 공격 +${st.formPowerBonus||0}% · 외형 속도 +${st.formSpeedBonus||0}%`;
   $('stage').className='stage ' + zone.bg;
   $('monsterHpText').textContent=`HP ${Math.max(0,Math.round(state.monster.hp))} / ${state.monster.maxHp} · 방어 ${state.monster.defense||0} · 피격 ${state.monster.hitCount||0}회`;
   $('monsterHpBar').style.width=`${Math.max(0,Math.min(100,state.monster.hp/state.monster.maxHp*100))}%`;
@@ -407,19 +433,19 @@ function renderMissions(){
   const uniqueCount=stacks.length;
   const totalLv=passiveTotalLv(stacks);
   const charSteps=[
-    ['기본 외형',0],['외형 1단계',2],['외형 2단계',5],['외형 3단계',10],['외형 4단계',18],['외형 5단계',28],['최종 외형',40]
+    ['기본 외형',0,0,0],['외형 1단계',2,5,3],['외형 2단계',5,12,7],['외형 3단계',10,22,12],['외형 4단계',18,36,18],['외형 5단계',28,55,25],['최종 외형',40,80,35]
   ];
   const auraSteps=[
-    ['기본 잔광',0],['새싹 광륜',1],['푸른 번개진',4],['보라 별문장',8],['황금 화염관',14],['붉은 균열핵',22],['무지개 신성폭풍',32],['천공 별폭풍',45],['심연 블랙홀',60],['백금 태양관',78],['흑백 일식진',100],['초월 은하폭주',130]
+    ['기본 잔광',0,0],['새싹 광륜',1,3],['푸른 번개진',4,7],['보라 별문장',8,12],['황금 화염관',14,18],['붉은 균열핵',22,26],['무지개 신성폭풍',32,36],['천공 별폭풍',45,50],['심연 블랙홀',60,68],['백금 태양관',78,90],['흑백 일식진',100,118],['초월 은하폭주',130,150]
   ];
   const autoCounts={};
   SKILL_POOL.filter(s=>s.statType==='autoStrike').forEach(s=>{autoCounts[s.grade]=(autoCounts[s.grade]||0)+1;});
   const autoRows=GRADES.filter(g=>autoCounts[g.key]).map(g=>`<div class="mission-item"><b><span class="${g.cls}">${g.name}</span> 자동공격 패시브</b><p>도감 내 ${autoCounts[g.key]}개 구성</p></div>`).join('');
   box.innerHTML=`
     <h3>캐릭터 외형 변경 조건</h3>
-    ${charSteps.map(([name,need])=>`<div class="mission-item ${uniqueCount>=need?'done':''}"><b>${name}</b><p>고유 패시브 ${need}개 필요 · 현재 ${uniqueCount}개</p></div>`).join('')}
+    ${charSteps.map(([name,need,power,speed])=>`<div class="mission-item ${uniqueCount>=need?'done':''}"><b>${name}</b><p>고유 패시브 ${need}개 필요 · 현재 ${uniqueCount}개 · 공격력 +${power}% · 공격속도 +${speed}%</p></div>`).join('')}
     <h3>오라 변경 조건</h3>
-    ${auraSteps.map(([name,need])=>`<div class="mission-item ${totalLv>=need?'done':''}"><b>${name}</b><p>총 패시브 레벨 ${need} 필요 · 현재 ${totalLv}</p></div>`).join('')}
+    ${auraSteps.map(([name,need,exp])=>`<div class="mission-item ${totalLv>=need?'done':''}"><b>${name}</b><p>총 패시브 레벨 ${need} 필요 · 현재 ${totalLv} · 추가 EXP +${exp}%</p></div>`).join('')}
     <h3>자동공격 스킬 구성</h3>
     ${autoRows}
     <h3>구역 개방 조건</h3>
