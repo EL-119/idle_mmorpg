@@ -305,7 +305,7 @@ function renderMonsterForm(){
 function displayClass(s){ return s.gradeClass; }
 function passiveTotalLv(list=passiveStacks()){ return list.reduce((a,s)=>a+(s.level||1),0); }
 function playerVisualTier(list=passiveStacks()){ const c=list.length, total=passiveTotalLv(list); if(c>=40||total>=90)return 6; if(c>=28||total>=60)return 5; if(c>=18||total>=38)return 4; if(c>=10||total>=22)return 3; if(c>=5||total>=10)return 2; if(c>=2||total>=4)return 1; return 0; }
-const AURA_TIER_REQUIREMENTS = [0, 5, 12, 25, 45, 70, 100, 140, 185, 235, 295, 365];
+const AURA_TIER_REQUIREMENTS = [0, 2, 5, 8, 12, 18, 25, 35, 48, 65, 85, 110];
 function auraVisualTier(list=passiveStacks()){
   const total = passiveTotalLv(list);
   let tier = 0;
@@ -314,7 +314,7 @@ function auraVisualTier(list=passiveStacks()){
   }
   return Math.min(11, tier);
 }
-function auraOpacity(list=passiveStacks()){ const tier=auraVisualTier(list); return Math.min(.96, .08 + tier*.062 + passiveTotalLv(list)*.0012); }
+function auraOpacity(list=passiveStacks()){ const tier=auraVisualTier(list); return Math.min(.98, .18 + tier*.07 + passiveTotalLv(list)*.002); }
 function updatePlayerVisual(list=passiveStacks()){ const p=$('playerSprite'); const a=$('aura'); if(!p||!a)return; const pTier=playerVisualTier(list); const aTier=auraVisualTier(list); p.className='player player-tier-' + pTier; a.className='aura aura-tier-' + aTier; }
 function spawnAttackEffect(type='normal', label=''){ const layer=$('effectLayer'); if(!layer)return; const el=document.createElement('div'); el.className='attack-effect ' + (type==='skill'?'skill-effect':'normal-effect'); el.textContent=type==='skill' ? (label||'스킬') : '일반공격'; layer.appendChild(el); setTimeout(()=>el.remove(),700); }
 function spawnPlayerEffect(type='heal', label=''){ const layer=$('effectLayer'); if(!layer)return; const el=document.createElement('div'); el.className='player-effect ' + type; el.textContent=label; layer.appendChild(el); setTimeout(()=>el.remove(),900); }
