@@ -957,3 +957,33 @@ body > .create-close-fixed,
 .aura-tier-9:before{left:-28px;top:-34px;width:250px;height:250px;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.35),transparent 28%),conic-gradient(from 45deg,rgba(255,255,255,.98),rgba(251,191,36,.95),rgba(251,113,133,.7),rgba(255,255,255,.98));clip-path:polygon(50% 0,57% 31%,83% 9%,74% 40%,100% 50%,74% 60%,83% 91%,57% 69%,50% 100%,43% 69%,17% 91%,26% 60%,0 50%,26% 40%,17% 9%,43% 31%);filter:drop-shadow(0 0 40px rgba(255,255,255,.96)) drop-shadow(0 0 68px rgba(251,191,36,.8));animation:auraSpinSlow 2s linear infinite}.aura-tier-9:after{left:40px;top:-18px;width:112px;height:215px;background:linear-gradient(180deg,rgba(255,255,255,.82),rgba(254,240,138,.48),transparent);clip-path:polygon(50% 0,62% 24%,88% 20%,68% 44%,82% 100%,50% 62%,18% 100%,32% 44%,12% 20%,38% 24%);filter:drop-shadow(0 0 28px rgba(254,240,138,.98));animation:auraFlicker .62s infinite alternate}
 .aura-tier-10:before{left:-38px;top:-44px;width:272px;height:272px;background:radial-gradient(circle,rgba(255,255,255,.88) 0 8%,rgba(2,6,23,.9) 10% 28%,transparent 30%),conic-gradient(from 0deg,#fff,#020617,#fff,#020617,#fff);clip-path:circle(50% at 50% 50%);filter:drop-shadow(0 0 48px rgba(255,255,255,.96)) drop-shadow(0 0 72px rgba(2,6,23,.9));animation:auraSpinSlow 1.8s linear infinite reverse}.aura-tier-10:after{left:-2px;top:8px;width:196px;height:178px;border:5px double rgba(255,255,255,.84);border-left-color:rgba(2,6,23,.85);border-bottom-color:rgba(2,6,23,.85);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 34px rgba(255,255,255,.72),inset 0 0 24px rgba(255,255,255,.38);animation:auraPulse 1.12s infinite ease-in-out}
 .aura-tier-11:before{left:-52px;top:-58px;width:300px;height:300px;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.85) 0 6%,rgba(168,85,247,.44) 8% 18%,transparent 22%),conic-gradient(from 0deg,#fff,#38bdf8,#a78bfa,#f472b6,#facc15,#34d399,#fff);clip-path:polygon(50% 0,57% 24%,76% 4%,70% 31%,97% 21%,78% 45%,100% 59%,72% 61%,90% 88%,61% 75%,50% 100%,39% 75%,10% 88%,28% 61%,0 59%,22% 45%,3% 21%,30% 31%,24% 4%,43% 24%);filter:drop-shadow(0 0 48px rgba(255,255,255,1)) drop-shadow(0 0 82px rgba(168,85,247,.96));animation:auraSpinSlow 1.05s linear infinite}.aura-tier-11:after{left:16px;top:-18px;width:166px;height:230px;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(56,189,248,.5),rgba(244,114,182,.42),transparent);clip-path:polygon(50% 0,62% 27%,49% 27%,80% 100%,30% 48%,45% 48%);filter:drop-shadow(0 0 34px rgba(255,255,255,.98));animation:auraFlicker .38s infinite alternate}
+
+/* v53: aura square-box artifact fix */
+.aura{
+  background-color:transparent!important;
+  border-radius:50%!important;
+  overflow:hidden!important;
+  filter:saturate(1.25)!important;
+  -webkit-mask-image:radial-gradient(circle,#000 0 72%,rgba(0,0,0,.6) 74%,transparent 78%)!important;
+  mask-image:radial-gradient(circle,#000 0 72%,rgba(0,0,0,.6) 74%,transparent 78%)!important;
+  -webkit-mask-repeat:no-repeat!important;
+  mask-repeat:no-repeat!important;
+  -webkit-mask-size:100% 100%!important;
+  mask-size:100% 100%!important;
+  background-clip:padding-box!important;
+}
+.aura:before,.aura:after{
+  background:transparent!important;
+  box-sizing:border-box!important;
+}
+.aura-tier-6{
+  background:
+    radial-gradient(circle,rgba(255,255,255,.34) 0 10%,rgba(255,0,160,.24) 24%,rgba(0,200,255,.22) 42%,rgba(255,255,0,.16) 58%,transparent 76%)!important;
+  box-shadow:0 0 42px rgba(255,255,255,.34),0 0 74px rgba(168,85,247,.28)!important;
+}
+.player-tier-6:after{
+  border-radius:50%!important;
+  overflow:hidden!important;
+  -webkit-mask-image:radial-gradient(circle,#000 0 70%,transparent 74%)!important;
+  mask-image:radial-gradient(circle,#000 0 70%,transparent 74%)!important;
+}
