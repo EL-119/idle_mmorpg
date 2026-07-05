@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" sizes="256x256" href="favicon.png" />
   <link rel="shortcut icon" href="favicon.ico" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=64-mobile-player-size" />
+  <link rel="stylesheet" href="styles.css?v=65-local-rival-ranking" />
 </head>
 <body>
   <div id="app">
@@ -130,7 +130,7 @@
   <div id="rankingModal" class="modal">
     <div class="modal-box ranking-box">
       <div class="modal-title"><h2>랭킹</h2><button id="rankingClose" class="ghost small">닫기</button></div>
-      <p>현재 랭킹은 실제로 생성해 플레이 중인 내 캐릭터만 표시됩니다. 서버 연동 전에는 가짜 유저를 절대 넣지 않습니다.</p>
+      <p>현재 랭킹은 내 브라우저 기록 기준이며, 경쟁 느낌을 위해 가상 도전자 랭킹이 함께 표시됩니다.</p>
       <div class="ranking-tabs">
         <button id="rankLevelTab" class="active">플레이어 레벨</button>
         <button id="rankZoneTab">현재 구역</button>
@@ -179,6 +179,6 @@
   </div>
 
   <script src="skills.js?v=35"></script>
-  <script src="game.js?v=64-mobile-player-size"></script>
+  <script src="game.js?v=65-local-rival-ranking"></script>
 </body>
 </html>

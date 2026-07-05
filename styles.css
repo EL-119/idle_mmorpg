@@ -727,6 +727,8 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
 .rank-row{display:grid;grid-template-columns:42px 1fr 86px 150px;gap:8px;align-items:center;background:#120e1d;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px 12px;color:#eee}
 .rank-row b{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#30254a;color:#fef3c7}
 .rank-row span{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-row em{font-style:normal;color:#c4b5fd;font-weight:900}.rank-row small{color:#b9a8d8;font-size:12px;text-align:right}.rank-row.me{border-color:#38bdf8;box-shadow:0 0 18px rgba(56,189,248,.35), inset 0 0 18px rgba(56,189,248,.08)}.rank-row.me b{background:linear-gradient(135deg,#06b6d4,#8b5cf6)}
+.rank-row.rival{opacity:.92}
+.rank-row.rival span:after{content:" NPC";font-size:10px;color:#8b7aa8;margin-left:6px;font-weight:800}
 
 .aura{overflow:visible!important;background:transparent!important;border-radius:0!important;mix-blend-mode:screen;filter:saturate(1.35);pointer-events:none}.aura:before,.aura:after{content:"";position:absolute;inset:0;pointer-events:none}.aura-tier-0:before{left:46px;top:34px;width:96px;height:120px;border-radius:42% 58% 54% 46%;background:radial-gradient(circle,rgba(134,239,172,.34),transparent 58%);box-shadow:0 0 22px rgba(134,239,172,.32)}.aura-tier-0:after{left:76px;top:10px;width:28px;height:150px;background:linear-gradient(180deg,transparent,rgba(187,247,208,.5),transparent);filter:blur(7px);animation:auraRise 2.6s infinite ease-in-out}
 .aura-tier-1:before{left:25px;top:24px;width:140px;height:140px;background:linear-gradient(90deg,transparent 0 20%,rgba(74,222,128,.45) 50%,transparent 80%);clip-path:polygon(50% 0,62% 36%,100% 50%,62% 64%,50% 100%,38% 64%,0 50%,38% 36%);filter:blur(.3px);animation:auraSpinSlow 4.5s linear infinite}.aura-tier-1:after{left:48px;top:46px;width:90px;height:90px;border:2px solid rgba(134,239,172,.7);border-left-color:transparent;border-bottom-color:transparent;transform:rotate(45deg);box-shadow:0 0 18px rgba(74,222,128,.55);animation:auraSpinSlow 3.2s linear infinite reverse}
@@ -749,7 +751,6 @@ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
 }
 #createModal .modal-box{position:relative!important; padding-top:18px!important;}
 #createCloseBottom{display:block!important; margin-top:10px!important; background:#2b2241!important;}
-.ranking-list .rank-row:not(.me){display:none!important;}
 .empty-rank{padding:18px;border-radius:14px;background:#120e1d;color:#d6c7ef;line-height:1.5}
 @media(max-width:820px){
   #createModal .modal-box{max-height:calc(100dvh - 28px)!important; margin-top:18px!important;}

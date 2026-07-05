@@ -455,11 +455,43 @@ function renderMissions(){
 
 
 let currentRankMode='level';
+const RANKING_RIVAL_NAMES=[
+  '새벽검 도전자','별빛 오라술사','붉은협곡 러너','마왕성 견습생','심연의 수집가','황금 슬라임러',
+  '천공의 성장러','고블린 학살자','무지개 패시브왕','은빛 방랑자','균열의 계승자','오라 연구가',
+  '초원의 랭커','망각의 기사','화염의 도전자','서리성 파수꾼','보라별 추격자','운빨 마스터',
+  '마검 수집가','초월 준비생','검은별 러너','용아 사냥꾼'
+];
+function seededRankRand(seed){
+  let x=Math.sin(seed)*10000;
+  return x-Math.floor(x);
+}
+function zoneByLevel(lv){
+  let z=ZONES[0], idx=0;
+  ZONES.forEach((zone,i)=>{ if(lv>=zone.min){ z=zone; idx=i; } });
+  return {...z, index:idx};
+}
+function buildRivalRows(){
+  if(!state) return [];
+  const myLv=Math.max(1,state.level||1);
+  const seedBase=String(state.id||state.createdAt||'rank').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const patterns=[1.42,1.28,1.16,1.08,1.03,0.98,0.93,0.88,0.82,0.76,0.70,0.64,0.58,0.52,0.46,0.40,0.34,0.28,0.22,0.18];
+  return patterns.map((rate,i)=>{
+    const jitter=(seededRankRand(seedBase+i*37)-0.5)*Math.max(2,myLv*0.08);
+    const lv=Math.max(1, Math.floor(myLv*rate + jitter + (i<3?3-i:0)));
+    const z=zoneByLevel(lv);
+    return {name:RANKING_RIVAL_NAMES[i%RANKING_RIVAL_NAMES.length],level:lv,zone:z.name,zoneIndex:z.index,me:false,rival:true};
+  });
+}
 function buildRankingRows(mode='level'){
-  clearFakeRankingCaches();
   if(!state || !state.name || !state.id || !isRealLocalPlayer(state)) return [];
   const z=currentZone();
-  return [{rank:1,name:state.name,level:Math.max(1,state.level||1),zone:z.name,zoneIndex:z.index,me:true}];
+  const me={name:state.name,level:Math.max(1,state.level||1),zone:z.name,zoneIndex:z.index,me:true};
+  const rows=[me,...buildRivalRows()];
+  rows.sort((a,b)=>{
+    if(mode==='zone') return (b.zoneIndex-a.zoneIndex) || (b.level-a.level) || String(a.name).localeCompare(String(b.name),'ko');
+    return (b.level-a.level) || (b.zoneIndex-a.zoneIndex) || String(a.name).localeCompare(String(b.name),'ko');
+  });
+  return rows.map((r,i)=>({...r,rank:i+1}));
 }
 function renderRanking(mode=currentRankMode){
   currentRankMode=mode;
