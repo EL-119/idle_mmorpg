@@ -1012,3 +1012,13 @@ body > .create-close-fixed,
 @keyframes auraBreathe{0%,100%{transform:scale(.92);opacity:.72}50%{transform:scale(1.08);opacity:1}}
 @keyframes auraPulseStrong{0%,100%{transform:scale(.86) rotate(45deg);opacity:.55}50%{transform:scale(1.14) rotate(45deg);opacity:1}}
 @media(max-width:820px){.aura{left:calc(16% - 60px)!important;bottom:6px!important;transform:scale(.84);transform-origin:center bottom}.aura:before,.aura:after{transform-origin:center!important}}
+
+
+/* v55: bind aura to the character so it moves as one body, especially on mobile */
+.stage > .aura{display:none!important}
+.player{overflow:visible!important;isolation:isolate!important}
+.player .aura{position:absolute!important;left:50%!important;bottom:-50px!important;width:210px!important;height:210px!important;margin-left:-105px!important;border-radius:50%!important;pointer-events:none!important;z-index:-1!important;transform-origin:center center!important;mix-blend-mode:screen}
+.player .aura:before,.player .aura:after{transform-origin:center center!important}
+.player .horn,.player .eye,.player .mouth{z-index:2}
+.player:before{z-index:1}
+@media(max-width:820px){.player .aura{left:50%!important;bottom:-48px!important;width:178px!important;height:178px!important;margin-left:-89px!important;transform-origin:center center!important}.player .aura:before,.player .aura:after{transform-origin:center center!important}}
