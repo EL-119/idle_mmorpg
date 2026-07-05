@@ -1148,3 +1148,54 @@ body > .create-close-fixed,
   .mobile-elevator-ad .e119-elevator{width:36px!important;height:62px!important}
   .mobile-elevator-ad .e119-cta{height:22px!important;font-size:9px!important}
 }
+
+
+/* v38 image-based Elevator119 ad from supplied reference mockup */
+.side-ad-left{
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  overflow:visible!important;
+  pointer-events:auto!important;
+  z-index:40!important;
+}
+.e119-image-ad{
+  display:block!important;
+  cursor:pointer!important;
+  text-decoration:none!important;
+  pointer-events:auto!important;
+}
+.side-ad-left .e119-pc-image-ad{
+  width:160px!important;
+  height:900px!important;
+  max-height:calc(100vh - 90px)!important;
+  border-radius:20px!important;
+  background:url("e119_pc_banner.png") center top / 100% 100% no-repeat!important;
+  box-shadow:0 0 0 2px rgba(255,255,255,.1),0 18px 42px rgba(0,0,0,.46)!important;
+  transition:transform .18s ease,filter .18s ease!important;
+}
+.side-ad-left .e119-pc-image-ad:hover{
+  transform:translateY(-3px)!important;
+  filter:brightness(1.03)!important;
+}
+.mobile-elevator-ad{display:none!important}
+@media(max-width:900px){
+  .side-ad-left{display:none!important}
+  .mobile-elevator-ad{
+    display:block!important;
+    max-width:760px!important;
+    margin:8px auto 5px!important;
+    padding:0 10px!important;
+  }
+  .mobile-elevator-ad .e119-mobile-image-ad{
+    width:100%!important;
+    height:120px!important;
+    border-radius:16px!important;
+    background:url("e119_mobile_banner.png") center center / 100% 100% no-repeat!important;
+    box-shadow:0 0 0 2px rgba(255,61,85,.28),0 10px 24px rgba(0,0,0,.32)!important;
+  }
+}
+@media(max-width:480px){
+  .mobile-elevator-ad{padding:0 6px!important;margin-top:6px!important}
+  .mobile-elevator-ad .e119-mobile-image-ad{height:96px!important;border-radius:14px!important}
+}
