@@ -931,3 +931,21 @@ body > .create-close-fixed,
     min-height:calc(100vh - 64px - 107px)!important;
   }
 }
+
+/* v50: original polished banner asset, URL line removed by natural crop only */
+@media (min-width:901px){
+  .e119-left-ad .e119-ad-pc,
+  .side-ad-left .e119-pc-image-ad{
+    overflow:hidden!important;
+    position:relative!important;
+  }
+  .e119-left-ad .e119-ad-pc img,
+  .side-ad-left .e119-pc-image-ad{
+    object-fit:cover!important;
+    object-position:center top!important;
+  }
+  .e119-left-ad .e119-ad-pc img{
+    height:calc(100% + 28px)!important;
+    max-height:none!important;
+  }
+}
