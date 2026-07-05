@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#141122" />
   <title>랜덤키우기</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=43-e119-layout-fix" />
+  <link rel="stylesheet" href="styles.css?v=44-clean-e119-layout" />
 </head>
 <body>
   <div id="app">
-    <aside class="side-ad side-ad-left" aria-label="승강기119 광고"><a class="e119-image-ad e119-pc-image-ad" href="https://승강기119.kr/" target="_blank" rel="noopener noreferrer" aria-label="승강기119 사이트로 이동"></a></aside>
+    <aside class="side-ad side-ad-left e119-left-ad" aria-label="승강기119 광고"><a class="e119-ad-img e119-ad-pc" href="https://승강기119.kr/" target="_blank" rel="noopener noreferrer" aria-label="승강기119 사이트로 이동"><img src="e119_pc_banner.png" alt="승강기119 엘리베이터 고장 이상 상담 광고"></a></aside>
     <aside class="side-ad side-ad-right" aria-label="우측 광고 영역"><span>광고 영역</span><small>우측 슬롯</small></aside>
     <header class="topbar">
       <div>
@@ -19,23 +19,7 @@
       </div>
       <div class="top-actions"><button id="statusBtn" class="mobile-status-btn">스테이터스</button><button id="noticeBtn" class="ghost">공지</button><button id="rankingBtn" class="ghost">랭킹</button><button id="missionBtn" class="ghost">임무</button><button id="saveBtn" class="ghost">저장</button></div>
     </header>
-    <div class="mobile-elevator-ad"><a class="e119-image-ad e119-mobile-image-ad" href="https://승강기119.kr/" target="_blank" rel="noopener noreferrer" aria-label="승강기119 사이트로 이동"></a></div>
-  <div class="e119-logo">승강기<span>119</span></div>
-  <div class="e119-main">승강기119가<br>도와드립니다</div>
-  <div class="e119-service-list">
-    <div><i>24</i><b>24시간 상담</b><small>언제 어디서나 빠른 상담 가능</small></div>
-    <div><i>?</i><b>증상별 안내</b><small>고장 증상별 확인</small></div>
-    <div><i>✓</i><b>공식 정보 확인</b><small>안전한 승강기 이용 정보</small></div>
-  </div>
-  <div class="e119-scene" aria-hidden="true">
-    <div class="e119-city"></div>
-    <div class="e119-elevator"><em></em><em></em><span></span></div>
-    <div class="e119-worker"></div>
-    <div class="e119-user"></div>
-  </div>
-  <div class="e119-cta">승강기119 바로가기 <b>›</b></div>
-  <div class="e119-domain">승강기119.kr</div>
-</a></div>
+    <div class="mobile-e119-ad"><a class="e119-ad-img e119-ad-mobile" href="https://승강기119.kr/" target="_blank" rel="noopener noreferrer" aria-label="승강기119 사이트로 이동"><img src="e119_mobile_banner.png" alt="승강기119 엘리베이터 고장 이상 상담 광고"></a></div>
 
     <main class="game-screen">
       <section class="panel stage-panel">
@@ -194,15 +178,5 @@
 
   <script src="skills.js?v=34"></script>
   <script src="game.js?v=34"></script>
-
-<script>
-document.addEventListener('click', function(e){
-  const ad = e.target.closest('.e119-image-ad');
-  if(ad){
-    e.preventDefault();
-    window.open('https://승강기119.kr/', '_blank', 'noopener');
-  }
-});
-</script>
 </body>
 </html>
