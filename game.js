@@ -305,8 +305,17 @@ function renderMonsterForm(){
 function displayClass(s){ return s.gradeClass; }
 function passiveTotalLv(list=passiveStacks()){ return list.reduce((a,s)=>a+(s.level||1),0); }
 function playerVisualTier(list=passiveStacks()){ const c=list.length, total=passiveTotalLv(list); if(c>=40||total>=90)return 6; if(c>=28||total>=60)return 5; if(c>=18||total>=38)return 4; if(c>=10||total>=22)return 3; if(c>=5||total>=10)return 2; if(c>=2||total>=4)return 1; return 0; }
-function auraOpacity(list=passiveStacks()){ return Math.min(.88, .16 + playerVisualTier(list)*.11 + passiveTotalLv(list)*.003); }
-function updatePlayerVisual(list=passiveStacks()){ const p=$('playerSprite'); const a=$('aura'); if(!p||!a)return; const tier=playerVisualTier(list); p.className='player player-tier-' + tier; a.className='aura aura-tier-' + tier; }
+const AURA_TIER_REQUIREMENTS = [0, 1, 4, 8, 14, 22, 32, 45, 60, 78, 100, 130];
+function auraVisualTier(list=passiveStacks()){
+  const total = passiveTotalLv(list);
+  let tier = 0;
+  for(let i=0;i<AURA_TIER_REQUIREMENTS.length;i++){
+    if(total >= AURA_TIER_REQUIREMENTS[i]) tier = i;
+  }
+  return Math.min(11, tier);
+}
+function auraOpacity(list=passiveStacks()){ return Math.min(.95, .18 + auraVisualTier(list)*.055 + passiveTotalLv(list)*.0016); }
+function updatePlayerVisual(list=passiveStacks()){ const p=$('playerSprite'); const a=$('aura'); if(!p||!a)return; const pTier=playerVisualTier(list); const aTier=auraVisualTier(list); p.className='player player-tier-' + pTier; a.className='aura aura-tier-' + aTier; }
 function spawnAttackEffect(type='normal', label=''){ const layer=$('effectLayer'); if(!layer)return; const el=document.createElement('div'); el.className='attack-effect ' + (type==='skill'?'skill-effect':'normal-effect'); el.textContent=type==='skill' ? (label||'스킬') : '일반공격'; layer.appendChild(el); setTimeout(()=>el.remove(),700); }
 function spawnPlayerEffect(type='heal', label=''){ const layer=$('effectLayer'); if(!layer)return; const el=document.createElement('div'); el.className='player-effect ' + type; el.textContent=label; layer.appendChild(el); setTimeout(()=>el.remove(),900); }
 function passiveStatSummary(stacks=passiveStacks()){
@@ -401,7 +410,7 @@ function renderMissions(){
     ['기본 외형',0],['외형 1단계',2],['외형 2단계',5],['외형 3단계',10],['외형 4단계',18],['외형 5단계',28],['최종 외형',40]
   ];
   const auraSteps=[
-    ['기본 오라',1],['오라 1단계',4],['오라 2단계',10],['오라 3단계',22],['오라 4단계',38],['오라 5단계',60],['최종 오라',90]
+    ['기본 오라',0],['새싹 잔광',1],['초록 결정 오라',4],['푸른 번개 오라',8],['보랏빛 별문양',14],['황금 화염 오라',22],['붉은 균열 오라',32],['무지개 신성 오라',45],['심연 폭풍 오라',60],['천공 왕관 오라',78],['흑백 일식 오라',100],['초월 은하 오라',130]
   ];
   const autoCounts={};
   SKILL_POOL.filter(s=>s.statType==='autoStrike').forEach(s=>{autoCounts[s.grade]=(autoCounts[s.grade]||0)+1;});
