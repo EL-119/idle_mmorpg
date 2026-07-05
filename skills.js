@@ -1,11 +1,11 @@
 const GRADES = [
-  { key:'normal', name:'일반', count:100, weight:720000, cls:'g-normal' },
-  { key:'magic', name:'매직', count:80, weight:200000, cls:'g-magic' },
-  { key:'rare', name:'레어', count:50, weight:65000, cls:'g-rare' },
-  { key:'unique', name:'유니크', count:30, weight:12000, cls:'g-unique' },
-  { key:'legend', name:'전설', count:10, weight:2500, cls:'g-legend' },
-  { key:'epic', name:'에픽', count:5, weight:450, cls:'g-epic' },
-  { key:'god', name:'신', count:2, weight:50, cls:'g-god' },
+  { key:'normal', name:'일반', count:100, weight:690000, cls:'g-normal' },
+  { key:'magic', name:'매직', count:80, weight:220000, cls:'g-magic' },
+  { key:'rare', name:'레어', count:50, weight:70000, cls:'g-rare' },
+  { key:'unique', name:'유니크', count:30, weight:15000, cls:'g-unique' },
+  { key:'legend', name:'전설', count:10, weight:4000, cls:'g-legend' },
+  { key:'epic', name:'에픽', count:5, weight:850, cls:'g-epic' },
+  { key:'god', name:'신', count:2, weight:150, cls:'g-god' },
 ];
 
 const PREFIX = {

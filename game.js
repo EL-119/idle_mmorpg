@@ -122,7 +122,7 @@ function createCharacter(){
   const name=makeRandomName();
   const first=rollSkill([]);
   first.level = 1;
-  state={ id:'player_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now(), localHumanPlayer:true, rankingEligible:true, saveVersion:34 };
+  state={ id:'player_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), name, level:1, exp:0, kills:0, enemyMaxHp:1, passives:[first], claimedMilestones:[], auto:true, monster:null, lastPassiveTick:{}, createdAt:Date.now(), localHumanPlayer:true, rankingEligible:true, saveVersion:35 };
   state.monster=makeMonster();
   newCharacterModalMode=false;
   $('createModal').classList.remove('active');
@@ -193,7 +193,7 @@ function calcStats(){
   stats.attackSpeed=+(1000/stats.attackMs).toFixed(2);
   return stats;
 }
-function needExp(){ return Math.max(1, Math.round(base.expNeed*Math.pow(1.18,state.level-1)*0.7/4)); }
+function needExp(){ return Math.max(1, Math.round(base.expNeed*Math.pow(1.14,state.level-1)*0.7/4)); }
 
 function hunt(){
   if(!state || !state.auto || pendingChoices.length) return;
