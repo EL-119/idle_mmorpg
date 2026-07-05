@@ -1200,70 +1200,10 @@ body > .create-close-fixed,
   .mobile-elevator-ad .e119-mobile-image-ad{height:96px!important;border-radius:14px!important}
 }
 
-
-/* v41 keep polished reference-image ad; only URL text removed from PC image */
-.side-ad-left{
-  padding:0!important;
-  border:0!important;
-  background:transparent!important;
-  overflow:visible!important;
-  pointer-events:auto!important;
-  z-index:40!important;
-}
-.e119-image-ad{
-  display:block!important;
-  cursor:pointer!important;
-  text-decoration:none!important;
-  pointer-events:auto!important;
-}
-.side-ad-left .e119-pc-image-ad{
-  width:160px!important;
-  height:900px!important;
-  max-height:calc(100vh - 90px)!important;
-  border-radius:20px!important;
-  background:url("e119_pc_banner.png") center top / 100% 100% no-repeat!important;
-  box-shadow:0 0 0 2px rgba(255,255,255,.1),0 18px 42px rgba(0,0,0,.46)!important;
-}
-.mobile-elevator-ad,
-.mobile-e119-wrap{
-  display:none!important;
-}
+/* v42: retain original polished banner and CTA; remove only footer URL */
 @media(max-width:900px){
-  .side-ad-left{display:none!important}
-  .mobile-elevator-ad,
-  .mobile-e119-wrap{
-    display:block!important;
-    visibility:visible!important;
-    opacity:1!important;
-    width:100%!important;
-    max-width:760px!important;
-    margin:8px auto 6px!important;
-    padding:0 10px!important;
-    position:relative!important;
-    z-index:100!important;
-  }
-  .mobile-elevator-ad .e119-mobile-image-ad,
-  .mobile-e119-wrap .e119-mobile-image-ad{
-    display:block!important;
-    width:100%!important;
-    height:120px!important;
-    min-height:120px!important;
-    border-radius:16px!important;
-    background:url("e119_mobile_banner.png") center center / 100% 100% no-repeat!important;
-    box-shadow:0 0 0 2px rgba(255,61,85,.26),0 10px 24px rgba(0,0,0,.32)!important;
-  }
-  .side-ad-right{display:none!important}
+ .mobile-elevator-ad{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;max-width:760px!important;margin:8px auto 6px!important;padding:0 10px!important;position:relative!important;z-index:100!important}
+ .mobile-elevator-ad .e119-mobile-image-ad{display:block!important;width:100%!important;height:120px!important;min-height:120px!important;background:url("e119_mobile_banner.png") center/100% 100% no-repeat!important;border-radius:16px!important}
+ .side-ad-left{display:none!important}
 }
-@media(max-width:480px){
-  .mobile-elevator-ad,
-  .mobile-e119-wrap{
-    padding:0 6px!important;
-    margin:6px auto 5px!important;
-  }
-  .mobile-elevator-ad .e119-mobile-image-ad,
-  .mobile-e119-wrap .e119-mobile-image-ad{
-    height:96px!important;
-    min-height:96px!important;
-    border-radius:14px!important;
-  }
-}
+@media(max-width:480px){.mobile-elevator-ad{padding:0 6px!important}.mobile-elevator-ad .e119-mobile-image-ad{height:96px!important;min-height:96px!important}}
