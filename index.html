@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#141122" />
   <title>랜덤키우기</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=35-elevator119-ad" />
+  <link rel="stylesheet" href="styles.css?v=36-elevator119-ad-fixed" />
 </head>
 <body>
   <div id="app">
@@ -190,5 +190,14 @@
 
   <script src="skills.js?v=34"></script>
   <script src="game.js?v=34"></script>
+<script>
+document.addEventListener('click', function(e){
+  const ad=e.target.closest('.elevator119-ad');
+  if(ad){
+    e.preventDefault();
+    window.open('https://seungganggi119.vercel.app/', '_blank', 'noopener');
+  }
+});
+</script>
 </body>
 </html>
