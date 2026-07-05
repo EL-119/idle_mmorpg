@@ -1207,3 +1207,43 @@ body > .create-close-fixed,
  .side-ad-left{display:none!important}
 }
 @media(max-width:480px){.mobile-elevator-ad{padding:0 6px!important}.mobile-elevator-ad .e119-mobile-image-ad{height:96px!important;min-height:96px!important}}
+
+
+/* v43 layout fix: keep ad inside original side slot so game screen stays normal */
+@media(min-width:901px){
+  .side-ad{
+    width:130px!important;
+  }
+  .side-ad-left{
+    left:10px!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    overflow:visible!important;
+  }
+  .side-ad-left .e119-pc-image-ad{
+    width:130px!important;
+    height:min(790px, calc(100vh - 96px))!important;
+    border-radius:16px!important;
+    background:url("e119_pc_banner.png") center top / 100% 100% no-repeat!important;
+    box-shadow:0 0 0 2px rgba(255,255,255,.1),0 14px 34px rgba(0,0,0,.42)!important;
+  }
+  .game-screen{
+    max-width:1200px!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+  }
+}
+@media(max-width:1320px) and (min-width:901px){
+  .side-ad-left{
+    left:4px!important;
+  }
+  .side-ad-left .e119-pc-image-ad{
+    width:122px!important;
+  }
+}
+@media(max-width:1180px) and (min-width:901px){
+  .side-ad-left{
+    display:none!important;
+  }
+}
